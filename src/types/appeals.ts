@@ -1,4 +1,4 @@
-export type AppealStatus = 'new' | 'solved' | 'ignored';
+export type AppealStatus = 'new' | 'in_progress' | 'solved' | 'closed' | 'ignored';
 
 export interface Appeal {
   guid:        string;

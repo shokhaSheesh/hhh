@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { rootApi, PROJECT_ID } from '@/api/client';
+import { rootApi } from '@/api/client';
 
 export interface PermissionItem {
   custom_permission_id: string;

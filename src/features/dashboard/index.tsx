@@ -6,7 +6,6 @@ import {
   XAxis, YAxis, Tooltip, CartesianGrid, Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { TooltipProps } from 'recharts';
 import { AlertCircle } from 'lucide-react';
 import { useCardData, parseTariffMetrics, parseRentalMetrics, parseUserMetrics, parseTopStations, CARD_URLS } from './hooks/useDashboardData';
 import type { DashboardTab } from './hooks/useDashboardData';
@@ -47,7 +46,7 @@ function fmtUZS(v: number): string {
 
 // ─── Revenue tooltip ───────────────────────────────────────────────────────────
 
-function RevenueTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function RevenueTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-dark-border bg-[#16161D] px-4 py-3 shadow-2xl">
@@ -170,10 +169,10 @@ const METRICS_LEGEND = [
   { key: 'active_now',   label: 'Faol mijozlar',  color: '#A855F7' },
 ];
 
-function TariffMetricsTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function TariffMetricsTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
 
-  const getEntry = (key: string) => payload.find((p) => p.dataKey === key);
+  const getEntry = (key: string) => payload.find((p: any) => p.dataKey === key);
   const gross  = getEntry('gross_revenue');
   const net    = getEntry('net_revenue');
   const active_ = getEntry('active_now');
@@ -330,11 +329,11 @@ const RENTALS_LEGEND = [
   { key: 'active_rentals',    label: 'Faol',         color: '#3B82F6' },
 ];
 
-function RentalsTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function RentalsTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
 
-  const completed = payload.find((p) => p.dataKey === 'completed_rentals');
-  const activePay = payload.find((p) => p.dataKey === 'active_rentals');
+  const completed = payload.find((p: any) => p.dataKey === 'completed_rentals');
+  const activePay = payload.find((p: any) => p.dataKey === 'active_rentals');
   const total     = (completed?.value ?? 0) + (activePay?.value ?? 0);
 
   return (
@@ -461,7 +460,7 @@ function RentalsTab() {
 
 // ─── Users tab ────────────────────────────────────────────────────────────────
 
-function UserGrowthTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function UserGrowthTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-xl border border-dark-border bg-[#16161D] px-4 py-3 shadow-2xl">
@@ -473,10 +472,10 @@ function UserGrowthTooltip({ active, payload, label }: TooltipProps<number, stri
   );
 }
 
-function UserActivityTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function UserActivityTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
-  const activePay   = payload.find((p) => p.dataKey === 'active_users');
-  const inactivePay = payload.find((p) => p.dataKey === 'inactive_users');
+  const activePay   = payload.find((p: any) => p.dataKey === 'active_users');
+  const inactivePay = payload.find((p: any) => p.dataKey === 'inactive_users');
   return (
     <div className="min-w-[190px] rounded-xl border border-dark-border bg-[#16161D] px-4 py-3 shadow-2xl">
       <p className="mb-2.5 text-xs font-semibold text-gray-300">{label}</p>
