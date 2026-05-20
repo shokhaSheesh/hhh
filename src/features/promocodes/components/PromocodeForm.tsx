@@ -214,9 +214,10 @@ interface Props {
   onSave:     (values: PromocodeFormValues) => void;
   onCancel:   () => void;
   saveLabel?: string;
+  saving?:    boolean;
 }
 
-export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = 'Saqlash' }: Props) {
+export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = 'Saqlash', saving = false }: Props) {
   const [form, setForm] = useState<PromocodeFormValues>(
     initial ? fromPromocode(initial) : DEFAULTS,
   );
@@ -226,8 +227,6 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = buildPayload(form);
-    console.log('[PromocodeForm] payload:', payload);
     onSave(form);
   };
 
@@ -337,8 +336,8 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
           className="rounded-xl border border-gray-700 px-5 py-2.5 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5">
           Bekor qilish
         </button>
-        <button type="submit"
-          className="rounded-xl bg-brand-lime px-5 py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90">
+        <button type="submit" disabled={saving}
+          className="rounded-xl bg-brand-lime px-5 py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50">
           {saveLabel}
         </button>
       </div>

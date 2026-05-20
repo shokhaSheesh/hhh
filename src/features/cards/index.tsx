@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MoreVertical, Trash2, CreditCard } from 'lucide-react';
-import { useCards } from './hooks/useCards';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, Trash2, CreditCard, Check, X } from 'lucide-react';
+import { useCards, deleteCard } from './hooks/useCards';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { Card } from '@/types/cards';
 
@@ -52,51 +52,11 @@ function VerifiedBadge({ verified }: { verified: boolean }) {
   );
 }
 
-// ─── Action menu ──────────────────────────────────────────────────────────────
-
-function CardActionMenu({ card, onDelete }: { card: Card; onDelete: (card: Card) => void }) {
-  const { canDelete }   = usePermissions();
-  const [open, setOpen] = useState(false);
-  const ref             = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const h = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex h-8 w-8 items-center justify-center rounded-xl border border-dark-border bg-dark-surface text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
-      >
-        <MoreVertical className="h-4 w-4" />
-      </button>
-
-      {open && canDelete('cards') && (
-        <div className="absolute right-0 top-full z-30 mt-1 w-44 overflow-hidden rounded-xl border border-dark-border bg-[#1E1E2D] shadow-2xl">
-          <button
-            type="button"
-            onClick={() => { setOpen(false); onDelete(card); }}
-            className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10"
-          >
-            <Trash2 className="h-4 w-4 shrink-0" />
-            O'chirish
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─── Table row ────────────────────────────────────────────────────────────────
 
 function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => void }) {
+  const { canDelete }  = usePermissions();
   const cardType = detectCardType(card.number, card.name);
   const user     = card.users_id_data;
 
@@ -166,7 +126,15 @@ function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => voi
 
       {/* Amallar */}
       <div className="w-20 shrink-0 px-4 py-3">
-        <CardActionMenu card={card} onDelete={onDelete} />
+        {canDelete('cards') && (
+          <button
+            type="button"
+            onClick={() => onDelete(card)}
+            className="group/del rounded-xl border border-gray-700 bg-gray-800 p-1.5 transition-colors hover:border-red-500/50 hover:bg-red-500/10"
+          >
+            <Trash2 className="h-3.5 w-3.5 text-gray-400 transition-colors group-hover/del:text-red-400" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -176,18 +144,105 @@ function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => voi
 
 const LIMIT = 20;
 
-export default function CardsPage() {
-  const [page, setPage] = useState(1);
+// ─── Toast ────────────────────────────────────────────────────────────────────
 
-  const { cards, total, loading, error } = useCards({ page, limit: LIMIT });
+interface Toast { id: number; message: string; ok: boolean; }
+let _tid = 0;
+
+function ToastContainer({ toasts }: { toasts: Toast[] }) {
+  if (!toasts.length) return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2">
+      {toasts.map((t) => (
+        <div key={t.id} className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl backdrop-blur-sm ${
+          t.ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+               : 'border-red-500/30 bg-red-500/10 text-red-400'
+        }`}>
+          {t.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
+          {t.message}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Delete confirm modal ─────────────────────────────────────────────────────
+
+function DeleteConfirm({ card, onConfirm, onCancel, deleting }: {
+  card: Card; onConfirm: () => void; onCancel: () => void; deleting: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} aria-hidden />
+      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-dark-border bg-dark-surface p-6 shadow-2xl">
+        <p className="text-sm font-semibold text-white">Kartani o'chirishni tasdiqlang</p>
+        <p className="mt-1 text-xs text-gray-400">
+          <span className="font-mono text-gray-300">{card.number}</span> raqamli karta o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.
+        </p>
+        <div className="mt-5 flex justify-end gap-3">
+          <button onClick={onCancel}
+            className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-white/5">
+            Bekor qilish
+          </button>
+          <button onClick={onConfirm} disabled={deleting}
+            className="rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50">
+            {deleting ? "O'chirilmoqda…" : "O'chirish"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function CardsPage() {
+  const [page,       setPage]       = useState(1);
+  const [tick,       setTick]       = useState(0);
+  const [toasts,     setToasts]     = useState<Toast[]>([]);
+  const [confirmCard, setConfirmCard] = useState<Card | null>(null);
+  const [deleting,   setDeleting]   = useState(false);
+
+  const { cards, total, loading, error } = useCards({ page, limit: LIMIT, tick });
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
+  function pushToast(message: string, ok: boolean) {
+    const id = ++_tid;
+    setToasts((p) => [...p, { id, message, ok }]);
+    setTimeout(() => setToasts((p) => p.filter((t) => t.id !== id)), 3000);
+  }
+
   function handleDelete(card: Card) {
-    console.log('[CardsPage] delete card:', card.guid, card.number);
+    setConfirmCard(card);
+  }
+
+  async function confirmDelete() {
+    if (!confirmCard) return;
+    setDeleting(true);
+    try {
+      await deleteCard(confirmCard.guid);
+      setConfirmCard(null);
+      setTick((n) => n + 1);
+      pushToast("Karta muvaffaqiyatli o'chirildi!", true);
+    } catch (err) {
+      pushToast(err instanceof Error ? err.message : "O'chirishda xatolik", false);
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
+    <>
+      <ToastContainer toasts={toasts} />
+      {confirmCard && (
+        <DeleteConfirm
+          card={confirmCard}
+          onConfirm={confirmDelete}
+          onCancel={() => setConfirmCard(null)}
+          deleting={deleting}
+        />
+      )}
     <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -266,5 +321,6 @@ export default function CardsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

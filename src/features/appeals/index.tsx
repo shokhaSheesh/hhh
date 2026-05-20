@@ -344,7 +344,11 @@ export default function AppealsPage() {
       <ToastList toasts={toasts} onDismiss={dismissToast} />
 
       {selectedAppeal && (
-        <AppealModal appeal={selectedAppeal} onClose={() => setSelectedAppeal(null)} />
+        <AppealModal
+          appeal={selectedAppeal}
+          onClose={() => setSelectedAppeal(null)}
+          onSuccess={() => setTick((t) => t + 1)}
+        />
       )}
 
       <div className="space-y-5">

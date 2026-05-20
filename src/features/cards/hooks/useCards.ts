@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import { createApi, VIEW } from '@/api/client';
+import { createApi, VIEW, rootApi } from '@/api/client';
 import type { Card, CardsListResponse } from '@/types/cards';
 
 const api = createApi(VIEW.cards);
+
+export async function deleteCard(guid: string): Promise<void> {
+  await rootApi.delete(`/v2/items/cards/${guid}?from-ofs=true`, { data: { data: {} } });
+}
 
 interface UseCardsParams {
   page:  number;
@@ -16,7 +20,7 @@ interface UseCardsResult {
   error:   string | null;
 }
 
-export function useCards({ page, limit }: UseCardsParams): UseCardsResult {
+export function useCards({ page, limit, tick = 0 }: UseCardsParams & { tick?: number }): UseCardsResult {
   const [cards,   setCards]   = useState<Card[]>([]);
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
@@ -44,7 +48,7 @@ export function useCards({ page, limit }: UseCardsParams): UseCardsResult {
       });
 
     return () => { cancelled = true; };
-  }, [page, limit]);
+  }, [page, limit, tick]);
 
   return { cards, total, loading, error };
 }

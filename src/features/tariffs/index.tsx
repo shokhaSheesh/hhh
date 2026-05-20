@@ -105,18 +105,20 @@ function SkeletonRows() {
 // ─── Data row ─────────────────────────────────────────────────────────────────
 
 function DataRow({
-  tariff, index, onEdit,
+  tariff, index, onEdit, onView,
 }: {
   tariff:  Tariff;
   index:   number;
   onEdit:  (t: Tariff) => void;
+  onView:  (t: Tariff) => void;
 }) {
   const { canUpdate } = usePermissions();
   const dayCount = tariff.tariff_types_id_data?.day_count;
 
   return (
     <div
-      className="relative flex items-center gap-4 border-b border-dark-border py-5 pr-4 pl-4"
+      onClick={() => onView(tariff)}
+      className="relative flex cursor-pointer items-center gap-4 border-b border-dark-border py-5 pr-4 pl-4 transition-colors hover:bg-white/[0.02]"
       style={{ borderLeft: `3px solid ${tariff.color}` }}
     >
       <span className={`${COL.num} text-sm font-semibold text-gray-500`}>{index}</span>
@@ -163,7 +165,7 @@ function DataRow({
           <button
             type="button"
             title="Tahrirlash"
-            onClick={() => onEdit(tariff)}
+            onClick={(e) => { e.stopPropagation(); onEdit(tariff); }}
             className="group/edit rounded-xl border border-gray-700 bg-gray-800 p-1.5 transition-colors hover:border-brand-lime hover:bg-brand-lime"
           >
             <Pencil className="h-3.5 w-3.5 text-gray-400 transition-colors group-hover/edit:text-black" />
@@ -181,6 +183,7 @@ export default function TariffsPage() {
   const [tick,       setTick]       = useState(0);
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Tariff | null>(null);
+  const [viewTarget, setViewTarget] = useState<Tariff | null>(null);
   const { toasts, push } = useToasts();
 
   const { tariffs, total, loading, error } = useTariffs(tick);
@@ -211,6 +214,15 @@ export default function TariffsPage() {
           tariff={editTarget}
           onClose={() => setEditTarget(null)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {viewTarget && (
+        <TariffFormModal
+          tariff={viewTarget}
+          viewOnly
+          onClose={() => setViewTarget(null)}
+          onSuccess={() => {}}
         />
       )}
 
@@ -279,6 +291,7 @@ export default function TariffsPage() {
                     tariff={t}
                     index={i + 1}
                     onEdit={(t) => setEditTarget(t)}
+                    onView={(t) => setViewTarget(t)}
                   />
                 ))
               )}

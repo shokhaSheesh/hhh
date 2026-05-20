@@ -16,8 +16,9 @@ export const VIEW = {
   notifications:  `${BASE}/v3/menus/a8919382-fafb-49d4-9534-4eb61a0474a2/views/a554c84a-fa13-4058-9db6-3c31fbe8b513/tables`,
   transactions:   `${BASE}/v3/menus/0eebdfa0-bdab-4b3d-ac20-488a0d65a96e/views/95ca99bf-f559-4056-b1ae-dc202a6546fa/tables`,
   cards:          `${BASE}/v3/menus/3abcfab4-6ac3-4848-9fa5-dad6f5bd08ca/views/875690ca-e354-45fd-95ba-d3329262f5fc/tables`,
-  batteries:      `${BASE}/v3/menus/96d306f2-c7bf-4f25-86fe-309d1b54fdde/views/00fd8bee-be8d-49f1-be87-d41edb4cabb7/tables`,
-  admins:         `${BASE}/v3/menus/d90e55a6-6719-4733-bca1-616d5047c5d0/views/8c4a0ef0-152a-4edf-93eb-9895e5649cc0/tables`,
+  batteries:       `${BASE}/v3/menus/96d306f2-c7bf-4f25-86fe-309d1b54fdde/views/00fd8bee-be8d-49f1-be87-d41edb4cabb7/tables`,
+  admins:          `${BASE}/v3/menus/d90e55a6-6719-4733-bca1-616d5047c5d0/views/8c4a0ef0-152a-4edf-93eb-9895e5649cc0/tables`,
+  userOperations:  `${BASE}/v3/menus/e215f4bd-a8a0-43bd-9c54-eec3ba0a8ef0/views/2746c785-91eb-4afd-8624-ad80215e7e38/tables`,
 } as const;
 
 // ─── Error class ──────────────────────────────────────────────────────────────

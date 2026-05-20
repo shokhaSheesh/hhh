@@ -1,12 +1,20 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Ticket } from 'lucide-react';
-import PromocodeForm, { type PromocodeFormValues } from './components/PromocodeForm';
+import PromocodeForm, { type PromocodeFormValues, buildPayload } from './components/PromocodeForm';
+import { createPromocode, updatePromocode } from './hooks/usePromocodes';
+import type { Promocode } from '@/types/promocodes';
 
 interface Props {
-  onClose: () => void;
+  initial?:   Promocode | null;
+  onClose:    () => void;
+  onSuccess?: () => void;
 }
 
-export default function PromocodeModal({ onClose }: Props) {
+export default function PromocodeModal({ initial, onClose, onSuccess }: Props) {
+  const isEdit = Boolean(initial);
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState<string | null>(null);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', onKey);
@@ -17,9 +25,22 @@ export default function PromocodeModal({ onClose }: Props) {
     };
   }, [onClose]);
 
-  const handleSave = (values: PromocodeFormValues) => {
-    console.log('[PromocodeModal] new promocode:', values);
-    onClose();
+  const handleSave = async (values: PromocodeFormValues) => {
+    setSaving(true);
+    setError(null);
+    try {
+      if (isEdit && initial) {
+        await updatePromocode(initial.guid, buildPayload(values));
+      } else {
+        await createPromocode(buildPayload(values));
+      }
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Xatolik yuz berdi');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -35,7 +56,9 @@ export default function PromocodeModal({ onClose }: Props) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-lime/10">
               <Ticket className="h-4 w-4 text-brand-lime" />
             </div>
-            <h2 className="text-base font-semibold text-white">Promokod qo'shish</h2>
+            <h2 className="text-base font-semibold text-white">
+              {isEdit ? 'Promokodni tahrirlash' : "Promokod qo'shish"}
+            </h2>
           </div>
           <button onClick={onClose}
             className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-white/10 hover:text-white">
@@ -44,10 +67,13 @@ export default function PromocodeModal({ onClose }: Props) {
         </div>
 
         <div className="p-6">
+          {error && <p className="mb-4 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{error}</p>}
           <PromocodeForm
+            initial={initial}
             onSave={handleSave}
             onCancel={onClose}
-            saveLabel="Promokodni qo'shish"
+            saveLabel={saving ? 'Saqlanmoqda…' : isEdit ? 'Saqlash' : "Promokodni qo'shish"}
+            saving={saving}
           />
         </div>
       </div>

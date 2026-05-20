@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Ticket, Plus, AlertCircle, Infinity } from 'lucide-react';
+import { Ticket, Plus, AlertCircle, Infinity, Pencil, Trash2, Check, X } from 'lucide-react';
+import { deletePromocode } from './hooks/usePromocodes';
 import { usePromocodes } from './hooks/usePromocodes';
 import PromocodeModal from './PromocodeModal';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -70,15 +70,17 @@ const COL = {
   usage:   'flex-1 min-w-0',
   until:   'w-44  shrink-0',
   status:  'w-28  shrink-0',
+  actions: 'w-20  shrink-0',
 } as const;
 
 const HEADERS: [string, string][] = [
-  ['#',          COL.num],
-  ['Kod',        COL.key],
-  ['Chegirma',   COL.disc],
+  ['#',           COL.num],
+  ['Kod',         COL.key],
+  ['Chegirma',    COL.disc],
   ['Foydalanish', COL.usage],
-  ['Muddati',    COL.until],
-  ['Holati',     COL.status],
+  ['Muddati',     COL.until],
+  ['Holati',      COL.status],
+  ['',            COL.actions],
 ];
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -88,12 +90,13 @@ function SkeletonRows() {
     <>
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 border-b border-dark-border px-4 py-4">
-          <div className={`${COL.num}    h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.key}    h-6 animate-pulse rounded-lg bg-gray-800`} />
-          <div className={`${COL.disc}   h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.usage}  h-8 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.until}  h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.status} h-6 w-20 animate-pulse rounded-full bg-gray-800`} />
+          <div className={`${COL.num}     h-4 animate-pulse rounded bg-gray-800`} />
+          <div className={`${COL.key}     h-6 animate-pulse rounded-lg bg-gray-800`} />
+          <div className={`${COL.disc}    h-4 animate-pulse rounded bg-gray-800`} />
+          <div className={`${COL.usage}   h-8 animate-pulse rounded bg-gray-800`} />
+          <div className={`${COL.until}   h-4 animate-pulse rounded bg-gray-800`} />
+          <div className={`${COL.status}  h-6 w-20 animate-pulse rounded-full bg-gray-800`} />
+          <div className={`${COL.actions} h-7 animate-pulse rounded-xl bg-gray-800`} />
         </div>
       ))}
     </>
@@ -102,33 +105,31 @@ function SkeletonRows() {
 
 // ─── Data row ─────────────────────────────────────────────────────────────────
 
-function DataRow({ promo, index, onClick }: { promo: Promocode; index: number; onClick: () => void }) {
+function DataRow({ promo, index, onEdit, onDelete }: {
+  promo: Promocode; index: number;
+  onEdit: (p: Promocode) => void;
+  onDelete: (p: Promocode) => void;
+}) {
+  const { canUpdate, canDelete } = usePermissions();
+
   return (
-    <div
-      role="button" tabIndex={0}
-      onClick={onClick} onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className="flex cursor-pointer items-center gap-4 border-b border-dark-border px-4 py-4 transition-colors hover:bg-white/[0.04]"
-    >
+    <div className="flex items-center gap-4 border-b border-dark-border px-4 py-4 transition-colors hover:bg-white/[0.02]">
       <span className={`${COL.num} text-sm font-semibold text-gray-500`}>{index}</span>
 
-      {/* Key badge */}
       <div className={COL.key}>
         <span className="inline-flex items-center rounded-lg border border-brand-lime/25 bg-brand-lime/10 px-2.5 py-1 font-mono text-xs font-bold tracking-widest text-brand-lime">
           {promo.key}
         </span>
       </div>
 
-      {/* Discount */}
       <div className={COL.disc}>
         <DiscountCell amount={promo.amount} pct={promo.discount_percentage} />
       </div>
 
-      {/* Usage */}
       <div className={COL.usage}>
         <UsageCell userCount={promo.user_count} perUser={promo.use_count_per_user} />
       </div>
 
-      {/* Valid until */}
       <div className={COL.until}>
         {promo.valid_until ? (
           <span className="text-sm text-gray-300">{promo.valid_until}</span>
@@ -139,9 +140,23 @@ function DataRow({ promo, index, onClick }: { promo: Promocode; index: number; o
         )}
       </div>
 
-      {/* Status */}
       <div className={COL.status}>
         <StatusBadge active={promo.status} />
+      </div>
+
+      <div className={`${COL.actions} flex items-center gap-1.5`}>
+        {canUpdate('promocodes') && (
+          <button type="button" title="Tahrirlash" onClick={() => onEdit(promo)}
+            className="group/e rounded-xl border border-gray-700 bg-gray-800 p-1.5 transition-colors hover:border-brand-lime hover:bg-brand-lime">
+            <Pencil className="h-3.5 w-3.5 text-gray-400 transition-colors group-hover/e:text-black" />
+          </button>
+        )}
+        {canDelete('promocodes') && (
+          <button type="button" title="O'chirish" onClick={() => onDelete(promo)}
+            className="group/d rounded-xl border border-gray-700 bg-gray-800 p-1.5 transition-colors hover:border-red-500/50 hover:bg-red-500/10">
+            <Trash2 className="h-3.5 w-3.5 text-gray-400 transition-colors group-hover/d:text-red-400" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -151,15 +166,76 @@ function DataRow({ promo, index, onClick }: { promo: Promocode; index: number; o
 
 export default function PromocodesPage() {
   const { canWrite } = usePermissions();
-  const navigate    = useNavigate();
-  const [modalOpen, setModalOpen] = useState(false);
-  const { promocodes, total, loading, error } = usePromocodes();
+  const [modalOpen,   setModalOpen]   = useState(false);
+  const [editTarget,  setEditTarget]  = useState<Promocode | null>(null);
+  const [tick,        setTick]        = useState(0);
+  const [confirmDel,  setConfirmDel]  = useState<Promocode | null>(null);
+  const [deleting,    setDeleting]    = useState(false);
+  const [toasts,      setToasts]      = useState<{ id: number; message: string; ok: boolean }[]>([]);
+  const { promocodes, total, loading, error } = usePromocodes(tick);
 
-  const openDetail = (p: Promocode) =>
-    navigate(`/payments/promo-codes/${p.guid}`, { state: { promocode: p } });
+  let _tid = 0;
+  function pushToast(message: string, ok: boolean) {
+    const id = ++_tid;
+    setToasts((p) => [...p, { id, message, ok }]);
+    setTimeout(() => setToasts((p) => p.filter((t) => t.id !== id)), 3000);
+  }
+
+  async function handleDeleteConfirm() {
+    if (!confirmDel) return;
+    setDeleting(true);
+    try {
+      await deletePromocode(confirmDel.guid);
+      setConfirmDel(null);
+      setTick((n) => n + 1);
+      pushToast("Promokod muvaffaqiyatli o'chirildi!", true);
+    } catch (err) {
+      pushToast(err instanceof Error ? err.message : "O'chirishda xatolik", false);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <>
+      {/* Toasts */}
+      {toasts.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2">
+          {toasts.map((t) => (
+            <div key={t.id} className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl backdrop-blur-sm ${
+              t.ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                   : 'border-red-500/30 bg-red-500/10 text-red-400'
+            }`}>
+              {t.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
+              {t.message}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Delete confirm */}
+      {confirmDel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setConfirmDel(null)} aria-hidden />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-dark-border bg-dark-surface p-6 shadow-2xl">
+            <p className="text-sm font-semibold text-white">Promokodni o'chirishni tasdiqlang</p>
+            <p className="mt-1 text-xs text-gray-400">
+              <span className="font-mono text-gray-300">{confirmDel.key}</span> promokodi o'chiriladi.
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button onClick={() => setConfirmDel(null)}
+                className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-white/5">
+                Bekor qilish
+              </button>
+              <button onClick={handleDeleteConfirm} disabled={deleting}
+                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50">
+                {deleting ? "O'chirilmoqda…" : "O'chirish"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     <div className="space-y-5">
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
@@ -223,7 +299,13 @@ export default function PromocodesPage() {
                 </div>
               ) : (
                 promocodes.map((p, i) => (
-                  <DataRow key={p.guid} promo={p} index={i + 1} onClick={() => openDetail(p)} />
+                  <DataRow
+                    key={p.guid}
+                    promo={p}
+                    index={i + 1}
+                    onEdit={(p) => setEditTarget(p)}
+                    onDelete={(p) => setConfirmDel(p)}
+                  />
                 ))
               )}
             </div>
@@ -232,7 +314,19 @@ export default function PromocodesPage() {
       </div>
     </div>
 
-    {modalOpen && <PromocodeModal onClose={() => setModalOpen(false)} />}
+    {modalOpen && (
+      <PromocodeModal
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => setTick((n) => n + 1)}
+      />
+    )}
+    {editTarget && (
+      <PromocodeModal
+        initial={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSuccess={() => setTick((n) => n + 1)}
+      />
+    )}
     </>
   );
 }

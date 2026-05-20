@@ -183,12 +183,12 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
             guid:         user.guid,
             user_id_auth: user.user_id_auth || '5a732ce0-2aed-4e8f-b6d6-4082413ddea0',
           },
-          disable_faas: true,
+          disable_faas: false,
         });
       } else {
         await createUser({
           data: { ...data, open_id: crypto.randomUUID() },
-          disable_faas: true,
+          disable_faas: false,
         });
       }
       setSaved(true);

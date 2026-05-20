@@ -20,6 +20,7 @@ import TransactionsPage       from '@/features/transactions';
 import CardsPage              from '@/features/cards';
 import BatteriesPage          from '@/features/batteries';
 import AdminsPage             from '@/features/admins';
+import UserOperationsPage     from '@/features/user-operations';
 import SettingsPage           from '@/features/settings';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -57,8 +58,9 @@ export default function App() {
           <Route path="payments/tariff-types"      element={<TariffTypesPage />} />
           <Route path="payments/transactions"      element={<TransactionsPage />} />
           <Route path="payments/cards"             element={<CardsPage />} />
-          <Route path="payments/promo-codes"      element={<PromocodesPage />} />
-          <Route path="payments/promo-codes/:id" element={<PromocodeDetailPage />} />
+          <Route path="payments/promo-codes"         element={<PromocodesPage />} />
+          <Route path="payments/promo-codes/:id"   element={<PromocodeDetailPage />} />
+          <Route path="payments/user-operations"   element={<UserOperationsPage />} />
           <Route path="batteries"                 element={<BatteriesPage />} />
           <Route path="extra/settings"            element={<SettingsPage />} />
         </Route>

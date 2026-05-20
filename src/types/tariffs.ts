@@ -33,6 +33,27 @@ export interface TariffsListResponse {
   };
 }
 
+export interface TariffFacility {
+  guid:           string;
+  description_uz: string | null;
+  description_ru: string | null;
+  description_en: string | null;
+  tariffs_id:     string | null;
+  created_at:     string;
+  updated_at:     string;
+  [key: string]: unknown;
+}
+
+export interface TariffFacilitiesResponse {
+  status: string;
+  data: {
+    data: {
+      count:    number;
+      response: TariffFacility[];
+    };
+  };
+}
+
 export interface TariffTypesResponse {
   status: string;
   data: {

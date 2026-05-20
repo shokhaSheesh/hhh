@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Hash, MessageSquare, Calendar, Clock } from 'lucide-react';
+import { X, User, Phone, Hash, MessageSquare, Calendar, Clock, Check, Loader2 } from 'lucide-react';
+import { updateAppealStatus } from '../hooks/useAppeals';
 import type { Appeal, AppealStatus } from '@/types/appeals';
 
 // ─── Status config ────────────────────────────────────────────────────────────
@@ -47,9 +48,14 @@ function InfoRow({ icon: Icon, label, value }: {
 
 // ─── Modal ───────────────────────────────────────────────────────────────────
 
-export function AppealModal({ appeal, onClose }: { appeal: Appeal; onClose: () => void }) {
+export function AppealModal({ appeal, onClose, onSuccess }: {
+  appeal: Appeal; onClose: () => void; onSuccess?: () => void;
+}) {
   const currentStatus = (appeal.status[0] ?? 'new') as AppealStatus;
-  const [status, setStatus] = useState<AppealStatus>(currentStatus);
+  const [status,  setStatus]  = useState<AppealStatus>(currentStatus);
+  const [saving,  setSaving]  = useState(false);
+  const [saved,   setSaved]   = useState(false);
+  const [saveErr, setSaveErr] = useState<string | null>(null);
   const cfg = STATUS_CONFIG[status];
 
   useEffect(() => {
@@ -63,11 +69,18 @@ export function AppealModal({ appeal, onClose }: { appeal: Appeal; onClose: () =
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  const handleSave = () => {
-    console.log('[AppealModal] status update payload:', {
-      guid:   appeal.guid,
-      status: [status],
-    });
+  const handleSave = async () => {
+    setSaving(true); setSaveErr(null);
+    try {
+      await updateAppealStatus(appeal, status);
+      setSaved(true);
+      onSuccess?.();
+      setTimeout(onClose, 700);
+    } catch (err) {
+      setSaveErr(err instanceof Error ? err.message : 'Xatolik yuz berdi');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -182,11 +195,15 @@ export function AppealModal({ appeal, onClose }: { appeal: Appeal; onClose: () =
                 })}
               </div>
 
+              {saveErr && <p className="mt-2 text-xs text-red-400">{saveErr}</p>}
               <button
                 onClick={handleSave}
-                className="mt-3 w-full rounded-xl bg-brand-lime py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90"
+                disabled={saving || saved || status === currentStatus}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-lime py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
               >
-                Saqlash
+                {saved   ? <><Check className="h-4 w-4" /> Saqlandi!</>
+               : saving  ? <><Loader2 className="h-4 w-4 animate-spin" /> Saqlanmoqda…</>
+               :           'Saqlash'}
               </button>
             </div>
           </div>
