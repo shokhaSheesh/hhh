@@ -623,10 +623,10 @@ function UsersTab() {
 
 // ─── Stations leaderboard ─────────────────────────────────────────────────────
 
-function StationsTooltip({ active, payload, label }: TooltipProps<number, string>) {
+function StationsTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
-  const swaps = payload.find((p) => p.dataKey === 'total_swaps');
-  const users = payload.find((p) => p.dataKey === 'unique_users');
+  const swaps = payload.find((p: any) => p.dataKey === 'total_swaps');
+  const users = payload.find((p: any) => p.dataKey === 'unique_users');
   return (
     <div className="min-w-[210px] rounded-xl border border-dark-border bg-[#16161D] px-4 py-3 shadow-2xl">
       <p className="mb-2.5 truncate text-xs font-semibold text-gray-300">{label}</p>

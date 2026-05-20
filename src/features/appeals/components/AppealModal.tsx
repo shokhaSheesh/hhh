@@ -9,6 +9,7 @@ const STATUS_CONFIG: Record<AppealStatus, { label: string; dot: string; badge: s
   in_progress: { label: 'Jarayonda',    dot: 'bg-amber-400',   badge: 'border-amber-500/30  bg-amber-500/10  text-amber-400'     },
   solved:      { label: 'Hal qilingan', dot: 'bg-emerald-400', badge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' },
   closed:      { label: 'Yopilgan',     dot: 'bg-gray-500',    badge: 'border-gray-700 bg-gray-800 text-gray-500'                },
+  ignored:     { label: "E'tiborsiz",   dot: 'bg-gray-500',    badge: 'border-gray-500/20 bg-gray-500/10 text-gray-400'          },
 };
 
 const ALL_STATUSES: AppealStatus[] = ['new', 'in_progress', 'solved', 'closed'];
