@@ -90,21 +90,21 @@ function FacilityRow({
     description_ru: facility.description_ru ?? '',
     description_en: facility.description_en ?? '',
   });
-  const [saving,     setSaving]     = useState(false);
+
   const [saveErr,    setSaveErr]    = useState<string | null>(null);
   const [saved,      setSaved]      = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const [deleting,   setDeleting]   = useState(false);
 
   const handleSave = async () => {
-    setSaving(true); setSaveErr(null);
+    setSaveErr(null);
     try {
       await updateFacility(facility.guid, tariffId, form);
       setSaved(true);
       setTimeout(() => { setSaved(false); onSaved(); }, 800);
     } catch (err) {
       setSaveErr(err instanceof Error ? err.message : 'Xatolik yuz berdi');
-    } finally { setSaving(false); }
+    } finally { }
   };
 
   // Fire save when footer button increments the tick

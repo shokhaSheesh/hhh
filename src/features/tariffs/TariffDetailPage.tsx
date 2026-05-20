@@ -13,7 +13,7 @@ const LANGS: { key: keyof TariffFacility; label: string; flag: string }[] = [
   { key: 'description_en', label: 'English', flag: '🇬🇧' },
 ];
 
-function FacilityRow({ facility, accent }: { facility: TariffFacility; accent: string }) {
+function FacilityRow({ facility }: { facility: TariffFacility }) {
   return (
     <div className="rounded-xl border border-dark-border bg-white/[0.02] p-4">
       <div className="grid grid-cols-3 gap-4">
@@ -38,7 +38,7 @@ function FacilityRow({ facility, accent }: { facility: TariffFacility; accent: s
 
 // ─── Facilities tab content ───────────────────────────────────────────────────
 
-function FacilitiesTab({ tariffId, accent }: { tariffId: string; accent: string }) {
+function FacilitiesTab({ tariffId }: { tariffId: string }) {
   const { facilities, loading, error } = useTariffFacilities(tariffId);
 
   if (error) {
@@ -81,7 +81,7 @@ function FacilitiesTab({ tariffId, accent }: { tariffId: string; accent: string 
     <div className="space-y-3">
       <p className="text-xs text-gray-500">{facilities.length} ta imkoniyat</p>
       {facilities.map((f) => (
-        <FacilityRow key={f.guid} facility={f} accent={accent} />
+        <FacilityRow key={f.guid} facility={f} />
       ))}
     </div>
   );
@@ -180,7 +180,7 @@ export default function TariffDetailPage() {
             />
           )}
           {tab === 'facilities' && (
-            <FacilitiesTab tariffId={tariff.guid} accent={accent} />
+            <FacilitiesTab tariffId={tariff.guid} />
           )}
         </div>
       </div>
