@@ -138,11 +138,9 @@ function JsonModal({ tx, onClose }: { tx: Transaction; onClose: () => void }) {
 function TxRow({
   tx,
   onShowJson,
-  onDownloadReceipt,
 }: {
-  tx:                Transaction;
-  onShowJson:        (tx: Transaction) => void;
-  onDownloadReceipt: (tx: Transaction) => void;
+  tx:         Transaction;
+  onShowJson: (tx: Transaction) => void;
 }) {
   const ext       = parseExternalResponse(tx.external_response);
   const errorNote = tx.status === 'failed' ? (ext?.error_note ?? null) : null;
@@ -239,17 +237,6 @@ function TxRow({
         </div>
       </div>
 
-      {/* Fiskal chek */}
-      <div className="w-28 shrink-0 px-4 py-3">
-        <button
-          type="button"
-          onClick={() => onDownloadReceipt(tx)}
-          className="flex h-8 w-8 items-center justify-center rounded-xl border border-dark-border bg-dark-surface text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
-          title="Fiskal chek yuklab olish"
-        >
-          <Download className="h-3.5 w-3.5" />
-        </button>
-      </div>
     </div>
   );
 }
@@ -265,11 +252,6 @@ export default function TransactionsPage() {
   const { transactions, total, loading, error } = useTransactions({ page, limit: LIMIT });
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
-
-  function handleDownloadReceipt(tx: Transaction) {
-    console.log('Downloading receipt for:', tx.transaction_id || tx.guid);
-    alert(`Fiskal chek yuklab olinmoqda: ${tx.transaction_id || tx.guid}`);
-  }
 
   return (
     <div className="space-y-5">
@@ -311,7 +293,6 @@ export default function TransactionsPage() {
               { label: 'Holati',          w: 'w-40' },
               { label: 'Sana',            w: 'w-40' },
               { label: 'Provider javobi', w: 'w-60' },
-              { label: 'Fiskal chek',     w: 'w-28' },
             ].map(({ label, w }) => (
               <div key={label} className={`${w} shrink-0 px-4 py-3`}>
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</span>
@@ -332,7 +313,6 @@ export default function TransactionsPage() {
                 key={tx.guid}
                 tx={tx}
                 onShowJson={setJsonModalTx}
-                onDownloadReceipt={handleDownloadReceipt}
               />
             ))
           )}

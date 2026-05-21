@@ -122,6 +122,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setMenuPermsReady(false);
   }, []);
 
+  useEffect(() => {
+    const handler = () => logout();
+    window.addEventListener('auth:session-expired', handler);
+    return () => window.removeEventListener('auth:session-expired', handler);
+  }, [logout]);
+
   if (!ready) return null;
 
   return (

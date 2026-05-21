@@ -140,6 +140,12 @@ function DataRow({
 
   const opType = Array.isArray(op.type) ? op.type[0] : (op.type as string | null);
 
+  const TYPE_LABELS: Record<string, string> = {
+    withdraw: "Yechib olish",
+    deposit:  "Hisobni to'ldirish",
+  };
+  const opTypeLabel = opType ? (TYPE_LABELS[opType.toLowerCase()] ?? opType) : '—';
+
   return (
     <div className="flex items-center gap-4 border-b border-dark-border px-4 py-3.5 transition-colors hover:bg-white/[0.03]">
       <span className={`${COL.num} text-sm font-semibold text-gray-500`}>{rowNum}</span>
@@ -160,7 +166,7 @@ function DataRow({
         )}
       </div>
 
-      <span className={`${COL.type} truncate text-sm text-gray-300`}>{opType || '—'}</span>
+      <span className={`${COL.type} truncate text-sm text-gray-300`}>{opTypeLabel}</span>
 
       <span className={`${COL.amount} font-mono text-sm font-semibold text-white`}>
         {fmtAmount(op.amount)}

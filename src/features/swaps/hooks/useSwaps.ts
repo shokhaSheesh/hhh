@@ -1,8 +1,24 @@
 import { useState, useEffect } from 'react';
-import { createApi, VIEW } from '@/api/client';
-import type { SwapRecord, SwapsListResponse } from '@/types/swaps';
+import { createApi, rootApi, VIEW } from '@/api/client';
+import type { SwapRecord, SwapStatus, SwapsListResponse } from '@/types/swaps';
 
 const swapsApi = createApi(VIEW.swaps);
+
+export async function updateSwapStatus(swap: SwapRecord, newStatus: SwapStatus): Promise<void> {
+  await rootApi.put('/v2/items/user_battery_bindings?from-ofs=true', {
+    data: {
+      guid:             swap.guid,
+      subscriptions_id: swap.subscriptions_id,
+      batteries_id:     swap.batteries_id,
+      devices_id:       swap.devices_id,
+      users_id:         swap.users_id,
+      bound_at:         newStatus === 'bound' ? new Date().toISOString() : swap.bound_at,
+      unbound_at:       swap.unbound_at,
+      status:           [newStatus],
+    },
+    disable_faas: true,
+  });
+}
 
 interface UseSwapsOptions {
   page:   number;
@@ -15,6 +31,7 @@ interface UseSwapsResult {
   total:   number;
   loading: boolean;
   error:   string | null;
+  refetch: () => void;
 }
 
 export function useSwaps({ page, limit, search }: UseSwapsOptions): UseSwapsResult {
@@ -22,6 +39,9 @@ export function useSwaps({ page, limit, search }: UseSwapsOptions): UseSwapsResu
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
+  const [tick,    setTick]    = useState(0);
+
+  const refetch = () => setTick((t) => t + 1);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +67,7 @@ export function useSwaps({ page, limit, search }: UseSwapsOptions): UseSwapsResu
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, search]);
+  }, [page, limit, search, tick]);
 
-  return { swaps, total, loading, error };
+  return { swaps, total, loading, error, refetch };
 }

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search, Download, ChevronLeft, ChevronRight,
   AlertCircle, ArrowDownToLine, ArrowUpFromLine, Activity,
+  Check, X, Loader2, ChevronDown,
 } from 'lucide-react';
-import { useSwaps } from './hooks/useSwaps';
+import { useSwaps, updateSwapStatus } from './hooks/useSwaps';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { SwapRecord, SwapStatus } from '@/types/swaps';
 
@@ -27,23 +29,6 @@ function fmtDate(raw: string) {
   } catch { return raw; }
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
-
-const STATUS_MAP: Record<SwapStatus, { label: string; cls: string }> = {
-  bound:   { label: 'Qaytarildi',   cls: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' },
-  unbound: { label: 'Qaytarilmadi', cls: 'border-orange-500/30  bg-orange-500/10  text-orange-400'  },
-};
-
-function StatusBadge({ status }: { status: SwapStatus[] }) {
-  const key = (status[0] ?? 'unbound') as SwapStatus;
-  const { label, cls } = STATUS_MAP[key] ?? STATUS_MAP.unbound;
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${cls}`}>
-      {label}
-    </span>
-  );
-}
-
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
 function StatCard({ label, value, icon: Icon, iconBg }: {
@@ -62,6 +47,92 @@ function StatCard({ label, value, icon: Icon, iconBg }: {
   );
 }
 
+// ─── Status dropdown ──────────────────────────────────────────────────────────
+
+const STATUS_OPTIONS: { value: SwapStatus; label: string; cls: string; dot: string }[] = [
+  { value: 'bound',   label: 'Qaytarildi',   cls: 'text-emerald-400', dot: 'bg-emerald-400' },
+  { value: 'unbound', label: 'Qaytarilmadi', cls: 'text-orange-400',  dot: 'bg-orange-400'  },
+];
+
+function StatusDropdown({ status, onSelect, loading }: {
+  status:   SwapStatus;
+  onSelect: (v: SwapStatus) => void;
+  loading:  boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [pos,  setPos]  = useState<{ top: number; left: number; width: number } | null>(null);
+  const btnRef  = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const current = STATUS_OPTIONS.find((o) => o.value === status) ?? STATUS_OPTIONS[1];
+
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (listRef.current && !listRef.current.contains(t)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  function handleOpen() {
+    if (loading) return;
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 6, left: r.left, width: Math.max(r.width, 160) });
+    }
+    setOpen((v) => !v);
+  }
+
+  return (
+    <div>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={handleOpen}
+        disabled={loading}
+        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50 ${
+          status === 'bound'
+            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+            : 'border-orange-500/30 bg-orange-500/10 text-orange-400'
+        }`}
+      >
+        {loading
+          ? <Loader2 className="h-3 w-3 animate-spin" />
+          : <span className={`h-1.5 w-1.5 rounded-full ${current.dot}`} />}
+        {current.label}
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && pos && createPortal(
+        <div
+          ref={listRef}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
+          className="overflow-hidden rounded-xl border border-dark-border bg-[#1c1c26] shadow-2xl"
+        >
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onSelect(opt.value); setOpen(false); }}
+              className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04] ${
+                opt.value === status ? opt.cls + ' font-semibold' : 'text-gray-300'
+              }`}
+            >
+              <span className={`h-2 w-2 rounded-full shrink-0 ${opt.dot}`} />
+              {opt.label}
+              {opt.value === status && <Check className="ml-auto h-3.5 w-3.5" />}
+            </button>
+          ))}
+        </div>,
+        document.body,
+      )}
+    </div>
+  );
+}
+
 // ─── Column widths ────────────────────────────────────────────────────────────
 
 const COL = {
@@ -71,15 +142,20 @@ const COL = {
   device:  'w-40 shrink-0',
   station: 'flex-1 min-w-0',
   time:    'w-36 shrink-0',
-  status:  'w-32 shrink-0',
+  status:  'w-36 shrink-0',
 } as const;
 
 // ─── Data row ─────────────────────────────────────────────────────────────────
 
-function DataRow({ swap }: { swap: SwapRecord }) {
-  const user   = swap.users_id_data;
-  const device = swap.devices_id_data;
-  const batt   = swap.batteries_id_data;
+function DataRow({ swap, onToggle, toggling }: {
+  swap:     SwapRecord;
+  onToggle: (swap: SwapRecord, newStatus: SwapStatus) => void;
+  toggling: boolean;
+}) {
+  const user   = swap.users_id_data   ?? null;
+  const device = swap.devices_id_data ?? null;
+  const batt   = swap.batteries_id_data ?? null;
+  const status = (swap.status[0] ?? 'unbound') as SwapStatus;
 
   return (
     <div className="flex items-center gap-4 border-b border-dark-border px-4 py-4 transition-colors hover:bg-white/[0.04]">
@@ -89,37 +165,49 @@ function DataRow({ swap }: { swap: SwapRecord }) {
 
       {/* User */}
       <div className={`${COL.user} flex items-center gap-2.5 min-w-0`}>
-        {user.photo ? (
-          <img src={user.photo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+        {user ? (
+          <>
+            {user.photo ? (
+              <img src={user.photo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-700 text-xs font-semibold text-white">
+                {user.name?.charAt(0) ?? '?'}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold capitalize text-white">
+                {user.name?.toLowerCase() ?? '—'}
+              </p>
+              <p className="font-mono text-xs text-gray-500">{user.phone ?? '—'}</p>
+            </div>
+          </>
         ) : (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-700 text-xs font-semibold text-white">
-            {user.name.charAt(0)}
-          </div>
+          <span className="text-sm text-gray-600">—</span>
         )}
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold capitalize text-white">
-            {user.name.toLowerCase()}
-          </p>
-          <p className="font-mono text-xs text-gray-500">{user.phone}</p>
-        </div>
       </div>
 
       {/* Battery SN */}
       <div className={`${COL.battery} min-w-0`}>
-        <p className="truncate font-mono text-xs text-gray-300">{batt.battery_sn}</p>
-        <p className="mt-0.5 text-xs text-gray-600">
-          SOC: <span className="text-gray-400">{batt.soc}%</span>
-        </p>
+        {batt ? (
+          <>
+            <p className="truncate font-mono text-xs text-gray-300">{batt.battery_sn}</p>
+            <p className="mt-0.5 text-xs text-gray-600">
+              SOC: <span className="text-gray-400">{batt.soc}%</span>
+            </p>
+          </>
+        ) : (
+          <span className="text-sm text-gray-600">—</span>
+        )}
       </div>
 
       {/* Device name */}
       <div className={`${COL.device} min-w-0`}>
-        <p className="truncate text-sm font-semibold text-white">{device.device_name}</p>
+        <p className="truncate text-sm font-semibold text-white">{device?.device_name ?? '—'}</p>
       </div>
 
       {/* Station address */}
       <div className={`${COL.station} min-w-0`}>
-        <p className="truncate text-sm text-gray-300">{device.device_location || device.address || '—'}</p>
+        <p className="truncate text-sm text-gray-300">{device?.device_location || device?.address || '—'}</p>
       </div>
 
       {/* Time */}
@@ -127,9 +215,13 @@ function DataRow({ swap }: { swap: SwapRecord }) {
         {fmtDate(swap.unbound_at)}
       </span>
 
-      {/* Status */}
+      {/* Status dropdown */}
       <div className={COL.status}>
-        <StatusBadge status={swap.status} />
+        <StatusDropdown
+          status={status}
+          onSelect={(v) => onToggle(swap, v)}
+          loading={toggling}
+        />
       </div>
     </div>
   );
@@ -226,11 +318,36 @@ const HEADERS: [string, string][] = [
 export default function SwapsPage() {
   const [page,      setPage]      = useState(1);
   const [rawSearch, setRawSearch] = useState('');
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<{ id: number; message: string; ok: boolean }[]>([]);
   const search = useDebounce(rawSearch, 400);
 
   const handleSearch = (v: string) => { setRawSearch(v); setPage(1); };
 
-  const { swaps, total, loading, error } = useSwaps({ page, limit: PAGE_SIZE, search });
+  const { swaps, total, loading, error, refetch } = useSwaps({ page, limit: PAGE_SIZE, search });
+
+  let _tid = 0;
+  function pushToast(message: string, ok: boolean) {
+    const id = ++_tid;
+    setToasts((p) => [...p, { id, message, ok }]);
+    setTimeout(() => setToasts((p) => p.filter((t) => t.id !== id)), 3000);
+  }
+
+  async function handleToggle(swap: SwapRecord, newStatus: SwapStatus) {
+    setTogglingId(swap.guid);
+    try {
+      await updateSwapStatus(swap, newStatus);
+      refetch();
+      pushToast(
+        newStatus === 'bound' ? 'Qaytarildi deb belgilandi' : 'Qaytarilmadi deb belgilandi',
+        true,
+      );
+    } catch (err) {
+      pushToast(err instanceof Error ? err.message : 'Xatolik yuz berdi', false);
+    } finally {
+      setTogglingId(null);
+    }
+  }
 
   const counts = swaps.reduce(
     (acc, s) => {
@@ -242,6 +359,20 @@ export default function SwapsPage() {
   );
 
   return (
+    <>
+    {toasts.length > 0 && (
+      <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2">
+        {toasts.map((t) => (
+          <div key={t.id} className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl backdrop-blur-sm ${
+            t.ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                 : 'border-red-500/30 bg-red-500/10 text-red-400'
+          }`}>
+            {t.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
+            {t.message}
+          </div>
+        ))}
+      </div>
+    )}
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
@@ -316,7 +447,14 @@ export default function SwapsPage() {
                   Almashtirishlar topilmadi
                 </div>
               ) : (
-                swaps.map((swap) => <DataRow key={swap.guid} swap={swap} />)
+                swaps.map((swap) => (
+                  <DataRow
+                    key={swap.guid}
+                    swap={swap}
+                    onToggle={handleToggle}
+                    toggling={togglingId === swap.guid}
+                  />
+                ))
               )}
             </div>
           </div>
@@ -328,5 +466,6 @@ export default function SwapsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

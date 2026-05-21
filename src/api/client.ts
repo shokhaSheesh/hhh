@@ -128,8 +128,17 @@ async function request<T>(
   });
 
   if (res.status === 401 && _retry && refresh_token) {
-    await refreshOnce();
-    return request<T>(absoluteUrl, options, false);
+    try {
+      await refreshOnce();
+      return request<T>(absoluteUrl, options, false);
+    } catch {
+      window.dispatchEvent(new Event('auth:session-expired'));
+      throw new ApiError(401, 'Unauthorized', 'Sessiya muddati tugadi');
+    }
+  }
+
+  if (res.status === 401) {
+    window.dispatchEvent(new Event('auth:session-expired'));
   }
 
   if (!res.ok) {
