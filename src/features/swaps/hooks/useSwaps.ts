@@ -21,9 +21,10 @@ export async function updateSwapStatus(swap: SwapRecord, newStatus: SwapStatus):
 }
 
 interface UseSwapsOptions {
-  page:   number;
-  limit:  number;
-  search: string;
+  page:          number;
+  limit:         number;
+  userId?:       string;
+  statusFilter?: string | null;
 }
 
 interface UseSwapsResult {
@@ -34,7 +35,7 @@ interface UseSwapsResult {
   refetch: () => void;
 }
 
-export function useSwaps({ page, limit, search }: UseSwapsOptions): UseSwapsResult {
+export function useSwaps({ page, limit, userId, statusFilter }: UseSwapsOptions): UseSwapsResult {
   const [swaps,   setSwaps]   = useState<SwapRecord[]>([]);
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
@@ -48,9 +49,9 @@ export function useSwaps({ page, limit, search }: UseSwapsOptions): UseSwapsResu
     setLoading(true);
     setError(null);
 
-    const offset = (page - 1) * limit;
-    const body: Record<string, unknown> = { offset, limit };
-    if (search.trim()) body['search'] = search.trim();
+    const body: Record<string, unknown> = { offset: (page - 1) * limit, limit };
+    if (userId) body['users_id'] = userId;
+    if (statusFilter) body['status'] = [statusFilter];
 
     swapsApi
       .post<SwapsListResponse>('/user_battery_bindings/items/list', { data: body })
@@ -67,7 +68,7 @@ export function useSwaps({ page, limit, search }: UseSwapsOptions): UseSwapsResu
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, search, tick]);
+  }, [page, limit, userId, statusFilter, tick]);
 
   return { swaps, total, loading, error, refetch };
 }

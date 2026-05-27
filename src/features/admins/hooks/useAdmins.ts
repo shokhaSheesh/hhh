@@ -28,23 +28,15 @@ export async function deleteAdmin(guid: string): Promise<void> {
   await rootApi.delete(`/v2/items/admins/${guid}?from-ofs=true`, { data: { data: {} } });
 }
 
-interface UseAdminsParams {
-  page:    number;
-  limit:   number;
-  search?: string;
-}
-
 interface UseAdminsResult {
   admins:  Admin[];
-  total:   number;
   loading: boolean;
   error:   string | null;
   refetch: () => void;
 }
 
-export function useAdmins({ page, limit, search = '' }: UseAdminsParams): UseAdminsResult {
+export function useAdmins(): UseAdminsResult {
   const [admins,  setAdmins]  = useState<Admin[]>([]);
-  const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
   const [tick,    setTick]    = useState(0);
@@ -60,9 +52,8 @@ export function useAdmins({ page, limit, search = '' }: UseAdminsParams): UseAdm
       .post<AdminsListResponse>('/admins/items/list', {
         data: {
           row_view_id: ROW_VIEW_ID,
-          offset:      (page - 1) * limit,
-          limit,
-          search:      search.trim(),
+          offset:      0,
+          limit:       1000,
           order:       {},
           view_fields: [],
         },
@@ -70,7 +61,6 @@ export function useAdmins({ page, limit, search = '' }: UseAdminsParams): UseAdm
       .then((res) => {
         if (cancelled) return;
         setAdmins(res.data.data.response ?? []);
-        setTotal(res.data.data.count ?? 0);
         setLoading(false);
       })
       .catch((err: unknown) => {
@@ -80,7 +70,7 @@ export function useAdmins({ page, limit, search = '' }: UseAdminsParams): UseAdm
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, search, tick]);
+  }, [tick]);
 
-  return { admins, total, loading, error, refetch };
+  return { admins, loading, error, refetch };
 }

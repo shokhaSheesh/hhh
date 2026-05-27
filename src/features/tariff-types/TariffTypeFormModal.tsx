@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
 import { createTariffType } from '@/features/tariffs/hooks/useTariffs';
 
-const INPUT = 'w-full rounded-xl border border-gray-700 bg-[#1E1E2D] px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500';
-const LABEL = 'block text-xs font-medium text-gray-500 mb-1.5';
+const INPUT = 'w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400';
+const LABEL = 'block text-xs font-medium text-Color-Grey-Grey-600 mb-1.5';
 
 interface Props {
   onClose:   () => void;
@@ -49,18 +49,18 @@ export function TariffTypeFormModal({ onClose, onSuccess }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden />
 
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-dark-border bg-dark-surface shadow-2xl">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-dark-border px-6 py-4">
+        <div className="flex items-center justify-between border-b border-Color-Grey-Grey-200 px-6 py-4">
           <div>
-            <h2 className="text-base font-semibold text-white">Yangi tarif turi</h2>
-            <p className="mt-0.5 text-xs text-gray-500">Nomi va davomiyligini kiriting</p>
+            <h2 className="text-base font-semibold text-Color-Grey-Grey-950">Yangi tarif turi</h2>
+            <p className="mt-0.5 text-xs text-Color-Grey-Grey-600">Nomi va davomiyligini kiriting</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-gray-700 bg-gray-800 p-1.5 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+            className="rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950"
           >
             <X className="h-4 w-4" />
           </button>
@@ -92,23 +92,23 @@ export function TariffTypeFormModal({ onClose, onSuccess }: Props) {
               placeholder="0 — cheksiz uchun"
               className={INPUT}
             />
-            <p className="mt-1.5 text-xs text-gray-600">0 kiriting — cheksiz muddatli tarif uchun</p>
+            <p className="mt-1.5 text-xs text-Color-Grey-Grey-500">0 kiriting — cheksiz muddatli tarif uchun</p>
           </div>
 
           {error && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs text-red-400">
+            <div className="rounded-xl border border-Color-Danger-Danger-Accent bg-Color-Danger-Danger-Soft px-4 py-2.5 text-xs text-Color-Danger-Danger-Accent">
               {error}
             </div>
           )}
         </form>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-dark-border px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-Color-Grey-Grey-200 px-6 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="rounded-xl border border-gray-700 px-5 py-2.5 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5 disabled:opacity-50"
+            className="rounded-xl border border-Color-Grey-Grey-200 px-5 py-2.5 text-sm font-semibold text-Color-Grey-Grey-700 transition-colors hover:bg-Color-Grey-Grey-50 disabled:opacity-50"
           >
             Bekor qilish
           </button>
@@ -116,12 +116,12 @@ export function TariffTypeFormModal({ onClose, onSuccess }: Props) {
             type="submit"
             form="tariff-type-form"
             disabled={loading || saved || !canSubmit}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-lime px-6 py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-Color-Primary-Primary px-6 py-2.5 text-sm font-bold text-Color-Dark-Constant-Dark transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {saved ? (
               <><Check className="h-4 w-4" /> Saqlandi!</>
             ) : loading ? (
-              <><span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" /> Saqlanmoqda…</>
+              <><span className="h-4 w-4 animate-spin rounded-full border-2 border-Color-Dark-Constant-Dark border-t-transparent" /> Saqlanmoqda…</>
             ) : (
               'Yaratish'
             )}

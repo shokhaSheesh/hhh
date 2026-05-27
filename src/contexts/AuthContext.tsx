@@ -8,8 +8,20 @@ const PROJECT_ID       = 'cfca2b3a-b0ec-48a0-aa42-fdda6a0ae590';
 const MENUS_PARENT_ID  = 'c57eedc3-a954-4262-a0af-376c65b5a284';
 
 interface RawMenuItem {
-  id:   string;
-  data: { permission?: { read?: boolean } };
+  id:          string;
+  name?:       string;
+  label?:      string;
+  attributes?: { label_en?: string; label_ru?: string; label_uz?: string };
+  data:        { permission?: { read?: boolean } };
+}
+
+function menuKeys(item: RawMenuItem): string[] {
+  const keys: string[] = [item.id];
+  // also index by name slug so nav items can match without hardcoded UUIDs
+  if (item.name) keys.push(item.name.toLowerCase().replace(/-/g, '_'));
+  if (item.label) keys.push(item.label.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_'));
+  if (item.attributes?.label_en) keys.push(item.attributes.label_en.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_'));
+  return [...new Set(keys)];
 }
 
 async function fetchMenusPage(parentId: string, token: string): Promise<RawMenuItem[]> {
@@ -22,15 +34,20 @@ async function fetchMenusPage(parentId: string, token: string): Promise<RawMenuI
 
 async function fetchMenuPermissions(token: string): Promise<Record<string, boolean>> {
   try {
-    // 1. Fetch top-level folders
     const folders = await fetchMenusPage(MENUS_PARENT_ID, token);
     const map: Record<string, boolean> = {};
-    for (const f of folders) map[f.id] = f.data?.permission?.read ?? true;
 
-    // 2. Fetch children of every folder in parallel to get item-level permissions
+    for (const f of folders) {
+      const perm = f.data?.permission?.read ?? true;
+      for (const k of menuKeys(f)) map[k] = perm;
+    }
+
     const childLists = await Promise.all(folders.map(f => fetchMenusPage(f.id, token)));
     for (const children of childLists) {
-      for (const item of children) map[item.id] = item.data?.permission?.read ?? true;
+      for (const item of children) {
+        const perm = item.data?.permission?.read ?? true;
+        for (const k of menuKeys(item)) map[k] = perm;
+      }
     }
 
     return map;
@@ -93,12 +110,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       saveMenuPerms({});
       return;
     }
-    // On refresh with cached perms: skip the fetch, mark ready immediately.
+    // Show cached perms instantly, then always refetch in background so changes in Ucode propagate.
     const cached = loadMenuPerms();
-    if (!isFreshLogin.current && Object.keys(cached).length > 0) {
-      isFreshLogin.current = false;
+    if (Object.keys(cached).length > 0) {
       setMenuPermsReady(true);
-      return;
     }
     isFreshLogin.current = false;
     fetchMenuPermissions(session.access_token).then((perms) => {

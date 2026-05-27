@@ -1,15 +1,91 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
+/* ─── Static tokens (never change with theme) ────────────────────────────── */
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --color-dark-bg:      #0D0D12;
-  --color-dark-surface: #16161D;
-  --color-dark-border:  #23232B;
-  --color-brand-lime:   #D1F22D;
+  --color-brand-lime:                 #D1F22D;
+  --color-Color-Primary-Primary:      #D1F22D;
+  --color-Color-Dark-Constant-Dark:   #0D0D12;
+  --color-Color-Light-Constant-White: #FFFFFF;
+  --color-Color-Info-Info-Accent:     #2563EB;
+  --color-Color-Info-Info:            #3B82F6;
 }
 
+/* ─── Semantic status tokens (dynamic) ───────────────────────────────────── */
+@theme inline {
+  --color-Color-Danger-Danger-Accent:   var(--t-danger-accent);
+  --color-Color-Danger-Danger-Soft:     var(--t-danger-soft);
+  --color-Color-Warning-Warning:        var(--t-warning);
+  --color-Color-Warning-Warning-Soft:   var(--t-warning-soft);
+  --color-Color-Success-Success:        var(--t-success);
+  --color-Color-Success-Success-Soft:   var(--t-success-soft);
+}
+
+/* ─── Dynamic tokens (respond to data-theme="light") ─────────────────────── */
+@theme inline {
+  --color-dark-bg:               var(--t-page-bg);
+  --color-dark-surface:          var(--t-surface);
+  --color-dark-border:           var(--t-border);
+
+  --color-Color-Light-Light:     var(--t-surface);
+  --color-Color-Grey-Grey-50:    var(--t-bg-subtle);
+  --color-Color-Grey-Grey-100:   var(--t-bg-muted);
+  --color-Color-Grey-Grey-200:   var(--t-border);
+  --color-Color-Grey-Grey-400:   var(--t-text-placeholder);
+  --color-Color-Grey-Grey-500:   var(--t-text-muted);
+  --color-Color-Grey-Grey-600:   var(--t-text-secondary);
+  --color-Color-Grey-Grey-700:   var(--t-text-tertiary);
+  --color-Color-Grey-Grey-950:   var(--t-text-primary);
+  --color-Color-Info-Info-Soft:  var(--t-info-soft);
+}
+
+/* ─── Dark theme (default) ───────────────────────────────────────────────── */
+:root {
+  --t-page-bg:          #0D0D12;
+  --t-surface:          #16161D;
+  --t-border:           #23232B;
+  --t-bg-subtle:        #0D0D12;
+  --t-bg-muted:         #1a1c22;
+  --t-text-placeholder: #374151;
+  --t-text-muted:       #4B5563;
+  --t-text-secondary:   #9CA3AF;
+  --t-text-tertiary:    #D1D5DB;
+  --t-text-primary:     #FFFFFF;
+  --t-info-soft:        rgba(59, 130, 246, 0.1);
+
+  --t-danger-accent:    #F87171;
+  --t-danger-soft:      rgba(248, 113, 113, 0.1);
+  --t-warning:          #FBBF24;
+  --t-warning-soft:     rgba(251, 191, 36, 0.1);
+  --t-success:          #34D399;
+  --t-success-soft:     rgba(52, 211, 153, 0.1);
+}
+
+/* ─── Light theme override ───────────────────────────────────────────────── */
+[data-theme="light"] {
+  --t-page-bg:          #F9FAFB;
+  --t-surface:          #FFFFFF;
+  --t-border:           #E5E7EB;
+  --t-bg-subtle:        #F9FAFB;
+  --t-bg-muted:         #F3F4F6;
+  --t-text-placeholder: #9CA3AF;
+  --t-text-muted:       #6B7280;
+  --t-text-secondary:   #4B5563;
+  --t-text-tertiary:    #374151;
+  --t-text-primary:     #030712;
+  --t-info-soft:        #EFF6FF;
+
+  --t-danger-accent:    #EF4444;
+  --t-danger-soft:      #FEF2F2;
+  --t-warning:          #F59E0B;
+  --t-warning-soft:     #FFFBEB;
+  --t-success:          #10B981;
+  --t-success-soft:     #ECFDF5;
+}
+
+/* ─── Base styles ────────────────────────────────────────────────────────── */
 .sidebar-logo {
   width: 100%;
   max-width: 180px;
@@ -22,8 +98,8 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #0D0D12;
+  background-color: var(--t-page-bg);
   font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  color: white;
+  color: var(--t-text-primary);
 }

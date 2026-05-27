@@ -8,8 +8,11 @@ import {
   Settings,
   Globe,
   LogOut,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const LANGUAGES = [
   { code: 'uz', label: "O'zbekcha" },
@@ -25,6 +28,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [langOpen, setLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
 
@@ -44,12 +48,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
   ];
 
   return (
-    <header className="flex h-20 shrink-0 items-center justify-between border-b border-dark-border bg-dark-surface px-6">
+    <header className="flex h-20 shrink-0 items-center justify-between border-b border-Color-Grey-Grey-200 bg-Color-Light-Light px-6">
       {/* Left: toggle + breadcrumb */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="cursor-pointer rounded-xl border border-gray-700 p-2 text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+          className="cursor-pointer rounded-xl border border-Color-Grey-Grey-200 p-2 text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950 transition-colors"
           aria-label="Toggle sidebar"
         >
           <Menu className="h-5 w-5" />
@@ -60,14 +64,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
             {crumbs.map((crumb, i) => (
               <li key={i} className="flex items-center gap-1.5">
                 {i > 0 && (
-                  <ChevronRight className="h-3.5 w-3.5 text-gray-600" />
+                  <ChevronRight className="h-3.5 w-3.5 text-Color-Grey-Grey-400" />
                 )}
                 <span
                   className={[
                     'text-sm font-sans',
                     i === crumbs.length - 1
-                      ? 'font-semibold text-white'
-                      : 'text-gray-500',
+                      ? 'font-semibold text-Color-Grey-Grey-950'
+                      : 'text-Color-Grey-Grey-600',
                   ].join(' ')}
                 >
                   {crumb}
@@ -78,17 +82,17 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </nav>
       </div>
 
-      {/* Right: language, notifications, settings, avatar */}
+      {/* Right: language, bell, theme toggle, settings, avatar, logout */}
       <div className="flex items-center gap-2">
         {/* Language selector */}
         <div className="relative">
           <button
             onClick={() => setLangOpen((o) => !o)}
-            className="flex items-center gap-2 rounded-xl border border-gray-700 px-3 py-2 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+            className="flex items-center gap-2 rounded-xl border border-Color-Grey-Grey-200 px-3 py-2 text-Color-Grey-Grey-700 hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950 transition-colors"
           >
-            <Globe className="h-4 w-4 text-gray-500" />
+            <Globe className="h-4 w-4 text-Color-Grey-Grey-500" />
             <span className="text-sm font-sans">{selectedLang.label}</span>
-            <ChevronDown className="h-4 w-4 text-gray-500" />
+            <ChevronDown className="h-4 w-4 text-Color-Grey-Grey-500" />
           </button>
 
           {langOpen && (
@@ -98,11 +102,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 onClick={() => setLangOpen(false)}
                 aria-hidden="true"
               />
-              <ul className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-xl border border-gray-700 bg-dark-surface shadow-2xl shadow-black/40">
+              <ul className="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-[0px_8px_16px_rgba(0,0,0,0.08)]">
                 {LANGUAGES.map((lang) => (
                   <li key={lang.code}>
                     <button
-                      className="w-full px-4 py-2.5 text-left text-sm font-sans text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                      className="w-full px-4 py-2.5 text-left text-sm font-sans text-Color-Grey-Grey-700 hover:bg-Color-Grey-Grey-50 hover:text-Color-Grey-Grey-950 transition-colors"
                       onClick={() => {
                         setSelectedLang(lang);
                         setLangOpen(false);
@@ -119,15 +123,25 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
         {/* Notification bell */}
         <button
-          className="rounded-xl border border-gray-700 p-2 text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+          className="rounded-xl border border-Color-Grey-Grey-200 p-2 text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950 transition-colors"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
         </button>
 
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="rounded-xl border border-Color-Grey-Grey-200 p-2 text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950 transition-colors"
+          aria-label="Toggle theme"
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
+
         {/* Settings */}
         <button
-          className="rounded-xl border border-gray-700 p-2 text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+          className="rounded-xl border border-Color-Grey-Grey-200 p-2 text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950 transition-colors"
           aria-label="Settings"
         >
           <Settings className="h-5 w-5" />
@@ -141,7 +155,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="rounded-xl border border-gray-700 p-2 text-gray-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-colors"
+          className="rounded-xl border border-Color-Grey-Grey-200 p-2 text-Color-Grey-Grey-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
           aria-label="Chiqish"
           title="Chiqish"
         >

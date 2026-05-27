@@ -19,8 +19,8 @@ function ToastContainer({ toasts }: { toasts: Toast[] }) {
           key={t.id}
           className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl backdrop-blur-sm ${
             t.ok
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-              : 'border-red-500/30 bg-red-500/10 text-red-400'
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+              : 'border-red-300 bg-red-50 text-red-600'
           }`}
         >
           {t.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
@@ -66,12 +66,12 @@ function SkeletonRows() {
   return (
     <>
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 border-b border-dark-border px-6 py-4">
-          <div className={`${COL.num}     h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.name}    h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.days}    h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.guid}    h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.actions} h-4 animate-pulse rounded bg-gray-800`} />
+        <div key={i} className="flex items-center gap-4 border-b border-Color-Grey-Grey-200 px-6 py-4">
+          <div className={`${COL.num}     h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.name}    h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.days}    h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.guid}    h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.actions} h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
         </div>
       ))}
     </>
@@ -89,27 +89,27 @@ function DataRow({
 }) {
   const { canDelete } = usePermissions();
   return (
-    <div className="flex items-center gap-4 border-b border-dark-border px-6 py-4 last:border-0">
-      <span className={`${COL.num} text-sm font-semibold text-gray-500`}>{index}</span>
+    <div className="flex items-center gap-4 border-b border-Color-Grey-Grey-200 px-6 py-4 last:border-0">
+      <span className={`${COL.num} text-sm font-semibold text-Color-Grey-Grey-500`}>{index}</span>
 
       <div className={`${COL.name} min-w-0`}>
-        <span className="text-sm font-semibold text-white">{type.name}</span>
+        <span className="text-sm font-semibold text-Color-Grey-Grey-950">{type.name}</span>
       </div>
 
       <div className={COL.days}>
         {type.day_count > 0 ? (
-          <span className="inline-flex items-center rounded-full bg-gray-800 px-2.5 py-0.5 text-xs font-medium text-gray-300">
+          <span className="inline-flex items-center rounded-full bg-Color-Grey-Grey-100 px-2.5 py-0.5 text-xs font-medium text-Color-Grey-Grey-700">
             {type.day_count} kun
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-brand-lime/10 px-2.5 py-0.5 text-xs font-semibold text-brand-lime">
+          <span className="inline-flex items-center rounded-full bg-Color-Primary-Primary/10 px-2.5 py-0.5 text-xs font-semibold text-Color-Primary-Primary">
             Cheksiz
           </span>
         )}
       </div>
 
       <div className={COL.guid}>
-        <span className="font-mono text-xs text-gray-500">{type.guid}</span>
+        <span className="font-mono text-xs text-Color-Grey-Grey-500">{type.guid}</span>
       </div>
 
       <div className={COL.actions}>
@@ -117,7 +117,7 @@ function DataRow({
           <button
             type="button"
             onClick={() => onDelete(type)}
-            className="rounded-lg border border-transparent p-1.5 text-gray-600 transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400"
+            className="rounded-lg border border-transparent p-1.5 text-Color-Grey-Grey-600 transition-colors hover:border-red-300 hover:bg-Color-Danger-Danger-Soft hover:text-Color-Danger-Danger-Accent"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -185,26 +185,26 @@ export default function TariffTypesPage() {
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-lime/10">
-            <Layers className="h-5 w-5 text-brand-lime" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-Color-Primary-Primary/10">
+            <Layers className="h-5 w-5 text-Color-Primary-Primary" />
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight text-white">Tariflar turi</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-Color-Grey-Grey-950">Tariflar turi</h1>
               {!loading && types.length > 0 && (
-                <span className="rounded-full bg-gray-800 px-2.5 py-0.5 text-xs font-semibold text-gray-400">
+                <span className="rounded-full bg-Color-Grey-Grey-100 px-2.5 py-0.5 text-xs font-semibold text-Color-Grey-Grey-600">
                   {types.length}
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-sm text-gray-400">Obuna rejalarining davomiyligi va turlari</p>
+            <p className="mt-0.5 text-sm text-Color-Grey-Grey-600">Obuna rejalarining davomiyligi va turlari</p>
           </div>
         </div>
 
         {canWrite('tariff_types') && (
           <button
             onClick={() => setCreateOpen(true)}
-            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-lime px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-Color-Info-Info-Accent px-5 py-2.5 text-sm font-semibold text-Color-Light-Constant-White transition-opacity hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
             Yangi tur
@@ -213,16 +213,16 @@ export default function TariffTypesPage() {
       </div>
 
       {/* Table card */}
-      <div className="overflow-hidden rounded-2xl border border-dark-border bg-dark-surface">
-        <div className="border-b border-dark-border px-6 py-4">
-          <h2 className="text-base font-semibold text-white">Tarif turlari ro'yxati</h2>
+      <div className="overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
+        <div className="border-b border-Color-Grey-Grey-200 px-6 py-4">
+          <h2 className="text-base font-semibold text-Color-Grey-Grey-950">Tarif turlari ro'yxati</h2>
         </div>
 
         <div className="overflow-x-auto">
           <div className="min-w-[700px]">
-            <div className="flex items-center gap-4 border-b border-dark-border bg-gray-800/40 px-6 py-3">
+            <div className="flex items-center gap-4 border-b border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-6 py-3">
               {HEADERS.map(([label, cls]) => (
-                <div key={label} className={`${cls} text-xs font-semibold uppercase tracking-wider text-gray-400`}>
+                <div key={label} className={`${cls} text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>
                   {label}
                 </div>
               ))}
@@ -232,8 +232,8 @@ export default function TariffTypesPage() {
               <SkeletonRows />
             ) : types.length === 0 ? (
               <div className="flex flex-col items-center gap-3 py-16 text-center">
-                <AlertCircle className="h-10 w-10 text-gray-700" strokeWidth={1.5} />
-                <p className="text-sm text-gray-600">Tarif turi topilmadi</p>
+                <AlertCircle className="h-10 w-10 text-Color-Grey-Grey-400" strokeWidth={1.5} />
+                <p className="text-sm text-Color-Grey-Grey-500">Tarif turi topilmadi</p>
               </div>
             ) : (
               types.map((t, i) => (

@@ -1,7 +1,7 @@
 const STATUS_MAP = {
-  success: { label: 'Muvaffaqiyatli', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' },
-  pending: { label: 'Jarayonda',      cls: 'bg-amber-500/15   text-amber-400   border-amber-500/25'   },
-  error:   { label: 'Xatolik',        cls: 'bg-red-500/15     text-red-400     border-red-500/25'     },
+  success: { label: 'Muvaffaqiyatli', cls: 'bg-Color-Success-Success-Soft text-Color-Success-Success border-Color-Success-Success'           },
+  pending: { label: 'Jarayonda',      cls: 'bg-Color-Warning-Warning-Soft text-Color-Warning-Warning border-Color-Warning-Warning'           },
+  error:   { label: 'Xatolik',        cls: 'bg-Color-Danger-Danger-Soft text-Color-Danger-Danger-Accent border-Color-Danger-Danger-Accent'   },
 } as const;
 
 type SwapStatus = keyof typeof STATUS_MAP;
@@ -29,13 +29,13 @@ const SWAPS: SwapRecord[] = [
 
 export default function RecentSwapsTable() {
   return (
-    <div className="flex flex-col rounded-2xl border border-dark-border bg-dark-surface">
+    <div className="flex flex-col rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border">
-        <span className="text-base font-semibold text-white">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-Color-Grey-Grey-200">
+        <span className="text-base font-semibold text-Color-Grey-Grey-950">
           Oxirgi almashtirishlar
         </span>
-        <button className="text-sm text-gray-500 transition-colors hover:text-white">
+        <button className="text-sm text-Color-Grey-Grey-500 transition-colors hover:text-Color-Grey-Grey-950">
           Barchasini ko'rish
         </button>
       </div>
@@ -44,12 +44,12 @@ export default function RecentSwapsTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-dark-border">
+            <tr className="border-b border-Color-Grey-Grey-200">
               {['ID', 'TURI', 'FOYDALANUVCHI', 'STANSIYA', 'BERILDI', 'QAYTARILDI', 'HOLATI', 'VAQTI'].map(
                 (col) => (
                   <th
                     key={col}
-                    className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500"
+                    className="whitespace-nowrap px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600"
                   >
                     {col}
                   </th>
@@ -64,20 +64,20 @@ export default function RecentSwapsTable() {
                 <tr
                   key={`${row.id}-${i}`}
                   className={[
-                    'transition-colors hover:bg-white/[0.02]',
-                    i < SWAPS.length - 1 ? 'border-b border-dark-border' : '',
+                    'transition-colors hover:bg-Color-Grey-Grey-50',
+                    i < SWAPS.length - 1 ? 'border-b border-Color-Grey-Grey-200' : '',
                   ].join(' ')}
                 >
-                  <td className="px-6 py-3.5 font-mono text-xs font-semibold text-gray-300">
+                  <td className="px-6 py-3.5 font-mono text-xs font-semibold text-Color-Grey-Grey-700">
                     {row.id}
                   </td>
-                  <td className="px-6 py-3.5 text-gray-300">{row.type}</td>
-                  <td className="px-6 py-3.5 font-medium text-white">{row.user}</td>
-                  <td className="px-6 py-3.5 text-gray-400">
+                  <td className="px-6 py-3.5 text-Color-Grey-Grey-700">{row.type}</td>
+                  <td className="px-6 py-3.5 font-medium text-Color-Grey-Grey-950">{row.user}</td>
+                  <td className="px-6 py-3.5 text-Color-Grey-Grey-600">
                     <span className="block max-w-[160px] truncate">{row.location}</span>
                   </td>
-                  <td className="px-6 py-3.5 text-gray-400">{row.given}</td>
-                  <td className="px-6 py-3.5 text-gray-400">{row.returned}</td>
+                  <td className="px-6 py-3.5 text-Color-Grey-Grey-600">{row.given}</td>
+                  <td className="px-6 py-3.5 text-Color-Grey-Grey-600">{row.returned}</td>
                   <td className="px-6 py-3.5">
                     <span
                       className={[
@@ -88,7 +88,7 @@ export default function RecentSwapsTable() {
                       {badge.label}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-3.5 font-mono text-xs text-gray-500">
+                  <td className="whitespace-nowrap px-6 py-3.5 font-mono text-xs text-Color-Grey-Grey-500">
                     {row.time}
                   </td>
                 </tr>

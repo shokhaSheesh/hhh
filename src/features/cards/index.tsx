@@ -2,16 +2,19 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Trash2, CreditCard, Check, X } from 'lucide-react';
 import { useCards, deleteCard } from './hooks/useCards';
 import { usePermissions } from '@/hooks/usePermissions';
+import UserFilter, { type UserOption } from '@/components/UserFilter';
 import type { Card } from '@/types/cards';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string) {
   try {
+    const utc = /Z|[+-]\d\d:\d\d$/.test(iso) ? iso : iso + 'Z';
     return new Intl.DateTimeFormat('ru-RU', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
-    }).format(new Date(iso));
+      timeZone: 'Asia/Tashkent',
+    }).format(new Date(utc));
   } catch { return iso; }
 }
 
@@ -31,22 +34,22 @@ function detectCardType(number: string, name: string): { label: string; cls: str
   const prefix = number.replace(/\s/g, '').slice(0, 4);
   const n      = name.toLowerCase();
 
-  if (prefix.startsWith('9860') || n.includes('humo'))   return { label: 'Humo',   cls: 'bg-green-500/20  text-green-300  border-green-500/30'  };
-  if (prefix.startsWith('5614') || n.includes('uzcard')) return { label: 'Uzcard', cls: 'bg-blue-500/20   text-blue-300   border-blue-500/30'   };
-  if (prefix.startsWith('4'))                            return { label: 'Visa',   cls: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' };
-  if (prefix.startsWith('5') || prefix.startsWith('2'))  return { label: 'MC',     cls: 'bg-orange-500/20 text-orange-300 border-orange-500/30' };
-  return { label: name || 'Karta', cls: 'bg-gray-700/50 text-gray-300 border-gray-600/30' };
+  if (prefix.startsWith('9860') || n.includes('humo'))   return { label: 'Humo',   cls: 'bg-purple-50 text-purple-700 border-purple-300'                                           };
+  if (prefix.startsWith('5614') || n.includes('uzcard')) return { label: 'Uzcard', cls: 'bg-Color-Info-Info-Soft text-Color-Info-Info border-Color-Info-Info'                      };
+  if (prefix.startsWith('4'))                            return { label: 'Visa',   cls: 'bg-Color-Warning-Warning-Soft text-Color-Warning-Warning border-Color-Warning-Warning'    };
+  if (prefix.startsWith('5') || prefix.startsWith('2'))  return { label: 'MC',     cls: 'bg-Color-Danger-Danger-Soft text-Color-Danger-Danger-Accent border-Color-Danger-Danger-Accent' };
+  return { label: name || 'Karta', cls: 'bg-Color-Grey-Grey-100 text-Color-Grey-Grey-700 border-Color-Grey-Grey-200' };
 }
 
 // ─── Verified badge ───────────────────────────────────────────────────────────
 
 function VerifiedBadge({ verified }: { verified: boolean }) {
   return verified ? (
-    <span className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-400">
+    <span className="inline-flex items-center rounded-full border border-Color-Success-Success bg-Color-Success-Success-Soft px-2.5 py-0.5 text-xs font-medium text-Color-Success-Success">
       Tasdiqlangan
     </span>
   ) : (
-    <span className="inline-flex items-center rounded-full border border-yellow-500/30 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-medium text-yellow-400">
+    <span className="inline-flex items-center rounded-full border border-Color-Warning-Warning bg-Color-Warning-Warning-Soft px-2.5 py-0.5 text-xs font-medium text-Color-Warning-Warning">
       Kutilmoqda
     </span>
   );
@@ -61,7 +64,7 @@ function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => voi
   const user     = card.users_id_data;
 
   return (
-    <div className="flex min-w-max items-center gap-0 border-b border-dark-border/60 transition-colors hover:bg-white/[0.02]">
+    <div className="flex min-w-max items-center gap-0 border-b border-Color-Grey-Grey-200 transition-colors hover:bg-Color-Grey-Grey-50">
       {/* Foydalanuvchi */}
       <div className="w-64 shrink-0 py-3 pl-6 pr-4">
         {user ? (
@@ -79,20 +82,20 @@ function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => voi
               />
             ) : null}
             <div
-              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-lime/10 text-xs font-bold text-brand-lime"
+              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-Color-Primary-Primary/10 text-xs font-bold text-Color-Primary-Primary"
               style={{ display: user.photo ? undefined : 'flex' }}
             >
               {initials(user.name)}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium capitalize text-white">
+              <p className="truncate text-sm font-medium capitalize text-Color-Grey-Grey-950">
                 {user.name.toLowerCase()}
               </p>
-              <p className="font-mono text-xs text-gray-500">{user.phone}</p>
+              <p className="font-mono text-xs text-Color-Grey-Grey-600">{user.phone}</p>
             </div>
           </div>
         ) : (
-          <span className="text-sm text-gray-600">—</span>
+          <span className="text-sm text-Color-Grey-Grey-500">—</span>
         )}
       </div>
 
@@ -106,17 +109,17 @@ function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => voi
 
       {/* Karta raqami */}
       <div className="w-48 shrink-0 px-4 py-3">
-        <span className="whitespace-nowrap font-mono text-sm text-white">{card.number}</span>
+        <span className="whitespace-nowrap font-mono text-sm text-Color-Grey-Grey-950">{card.number}</span>
       </div>
 
       {/* Muddati */}
       <div className="w-24 shrink-0 px-4 py-3">
-        <span className="font-mono text-sm text-gray-300">{fmtExpiry(card.expire_date)}</span>
+        <span className="font-mono text-sm text-Color-Grey-Grey-700">{fmtExpiry(card.expire_date)}</span>
       </div>
 
       {/* Qo'shilgan sana */}
       <div className="w-44 shrink-0 px-4 py-3">
-        <span className="text-sm text-gray-400">{fmtDate(card.created_at)}</span>
+        <span className="text-sm text-Color-Grey-Grey-600">{fmtDate(card.created_at)}</span>
       </div>
 
       {/* Holati */}
@@ -130,9 +133,9 @@ function CardRow({ card, onDelete }: { card: Card; onDelete: (card: Card) => voi
           <button
             type="button"
             onClick={() => onDelete(card)}
-            className="group/del rounded-xl border border-gray-700 bg-gray-800 p-1.5 transition-colors hover:border-red-500/50 hover:bg-red-500/10"
+            className="group/del rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light p-1.5 transition-colors hover:border-red-300 hover:bg-red-50"
           >
-            <Trash2 className="h-3.5 w-3.5 text-gray-400 transition-colors group-hover/del:text-red-400" />
+            <Trash2 className="h-3.5 w-3.5 text-Color-Grey-Grey-600 transition-colors group-hover/del:text-Color-Danger-Danger-Accent" />
           </button>
         )}
       </div>
@@ -155,8 +158,8 @@ function ToastContainer({ toasts }: { toasts: Toast[] }) {
     <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2">
       {toasts.map((t) => (
         <div key={t.id} className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl backdrop-blur-sm ${
-          t.ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-               : 'border-red-500/30 bg-red-500/10 text-red-400'
+          t.ok ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+               : 'border-red-300 bg-red-50 text-red-600'
         }`}>
           {t.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
           {t.message}
@@ -174,14 +177,14 @@ function DeleteConfirm({ card, onConfirm, onCancel, deleting }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} aria-hidden />
-      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-dark-border bg-dark-surface p-6 shadow-2xl">
-        <p className="text-sm font-semibold text-white">Kartani o'chirishni tasdiqlang</p>
-        <p className="mt-1 text-xs text-gray-400">
-          <span className="font-mono text-gray-300">{card.number}</span> raqamli karta o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.
+      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light p-6 shadow-2xl">
+        <p className="text-sm font-semibold text-Color-Grey-Grey-950">Kartani o'chirishni tasdiqlang</p>
+        <p className="mt-1 text-xs text-Color-Grey-Grey-600">
+          <span className="font-mono text-Color-Grey-Grey-700">{card.number}</span> raqamli karta o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.
         </p>
         <div className="mt-5 flex justify-end gap-3">
           <button onClick={onCancel}
-            className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 hover:bg-white/5">
+            className="rounded-xl border border-Color-Grey-Grey-200 px-4 py-2 text-sm font-semibold text-Color-Grey-Grey-700 hover:bg-Color-Grey-Grey-50">
             Bekor qilish
           </button>
           <button onClick={onConfirm} disabled={deleting}
@@ -196,14 +199,60 @@ function DeleteConfirm({ card, onConfirm, onCancel, deleting }: {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function CardsPage() {
-  const [page,       setPage]       = useState(1);
-  const [tick,       setTick]       = useState(0);
-  const [toasts,     setToasts]     = useState<Toast[]>([]);
-  const [confirmCard, setConfirmCard] = useState<Card | null>(null);
-  const [deleting,   setDeleting]   = useState(false);
+function Pagination({ page, total, limit, label, onChange }: {
+  page: number; total: number; limit: number; label: string; onChange: (p: number) => void;
+}) {
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (totalPages <= 1) return null;
+  const from = (page - 1) * limit + 1;
+  const to   = Math.min(page * limit, total);
+  const pgs: (number | '...')[] = [];
+  const add = (n: number) => { if (!pgs.includes(n)) pgs.push(n); };
+  add(1);
+  if (page > 3) pgs.push('...');
+  for (let p = Math.max(2, page - 1); p <= Math.min(totalPages - 1, page + 1); p++) add(p);
+  if (page < totalPages - 2) pgs.push('...');
+  if (totalPages > 1) add(totalPages);
+  return (
+    <div className="flex items-center justify-between border-t border-Color-Grey-Grey-200 px-6 py-4">
+      <span className="text-xs text-Color-Grey-Grey-600">{from}–{to} / {total.toLocaleString('ru-RU')} {label}</span>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onChange(Math.max(1, page - 1))} disabled={page === 1}
+          className="rounded-lg p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 disabled:cursor-not-allowed disabled:opacity-30">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        {pgs.map((p, i) =>
+          p === '...' ? (
+            <span key={`e${i}`} className="px-1 text-xs text-Color-Grey-Grey-400">…</span>
+          ) : (
+            <button key={p} onClick={() => onChange(p as number)}
+              className={['h-7 min-w-[28px] rounded-lg px-2 text-xs font-medium transition-colors',
+                p === page ? 'bg-Color-Primary-Primary text-Color-Dark-Constant-Dark' : 'text-Color-Grey-Grey-700 hover:bg-Color-Grey-Grey-100',
+              ].join(' ')}>
+              {p}
+            </button>
+          )
+        )}
+        <button onClick={() => onChange(Math.min(totalPages, page + 1))} disabled={page === totalPages}
+          className="rounded-lg p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 disabled:cursor-not-allowed disabled:opacity-30">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
-  const { cards, total, loading, error } = useCards({ page, limit: LIMIT, tick });
+export default function CardsPage() {
+  const [page,        setPage]        = useState(1);
+  const [tick,        setTick]        = useState(0);
+  const [userId,      setUserId]      = useState<string | undefined>(undefined);
+  const [toasts,      setToasts]      = useState<Toast[]>([]);
+  const [confirmCard, setConfirmCard] = useState<Card | null>(null);
+  const [deleting,    setDeleting]    = useState(false);
+
+  const handleUserSelect = (u: UserOption | null) => { setUserId(u?.guid); setPage(1); };
+
+  const { cards, total, loading, error } = useCards({ page, limit: LIMIT, userId, tick });
 
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
@@ -247,24 +296,25 @@ export default function CardsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Kartalar</h1>
-          <p className="mt-0.5 text-sm text-gray-500">Foydalanuvchilar bank kartalari</p>
+          <h1 className="text-2xl font-semibold text-Color-Grey-Grey-950">Kartalar</h1>
+          <p className="mt-0.5 text-sm text-Color-Grey-Grey-600">Foydalanuvchilar bank kartalari</p>
         </div>
       </div>
 
       {/* Table card */}
-      <div className="rounded-2xl border border-dark-border bg-dark-surface">
-        <div className="border-b border-dark-border px-6 py-4">
-          <h2 className="text-sm font-semibold text-white">Bank kartalar jadvali</h2>
+      <div className="rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
+        <div className="flex items-center gap-4 border-b border-Color-Grey-Grey-200 px-6 py-4">
+          <h2 className="text-sm font-semibold text-Color-Grey-Grey-950">Bank kartalar jadvali</h2>
+          <UserFilter onSelect={handleUserSelect} />
         </div>
 
         {error && (
-          <div className="px-6 py-4 text-sm text-red-400">{error}</div>
+          <div className="px-6 py-4 text-sm text-Color-Danger-Danger-Accent">{error}</div>
         )}
 
         <div className="overflow-x-auto">
           {/* Header row */}
-          <div className="flex min-w-max items-center gap-0 border-b border-dark-border bg-gray-900/40">
+          <div className="flex min-w-max items-center gap-0 border-b border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50">
             {[
               { label: 'Foydalanuvchi',   w: 'w-64', pl: true },
               { label: 'Karta nomi',      w: 'w-36'            },
@@ -275,7 +325,7 @@ export default function CardsPage() {
               { label: 'Amallar',         w: 'w-20'            },
             ].map(({ label, w, pl }) => (
               <div key={label} className={`${w} shrink-0 px-4 py-3 ${pl ? 'pl-6' : ''}`}>
-                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600">{label}</span>
               </div>
             ))}
           </div>
@@ -283,10 +333,10 @@ export default function CardsPage() {
           {/* Rows */}
           {loading ? (
             <div className="flex min-w-max items-center justify-center py-16">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-lime border-t-transparent" />
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-Color-Info-Info-Accent border-t-transparent" />
             </div>
           ) : cards.length === 0 ? (
-            <div className="py-16 text-center text-sm text-gray-600">Kartalar topilmadi</div>
+            <div className="py-16 text-center text-sm text-Color-Grey-Grey-500">Kartalar topilmadi</div>
           ) : (
             cards.map((card) => (
               <CardRow key={card.guid} card={card} onDelete={handleDelete} />
@@ -294,31 +344,7 @@ export default function CardsPage() {
           )}
         </div>
 
-        {/* Pagination */}
-        {!loading && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-dark-border px-6 py-4">
-            <p className="text-xs text-gray-500">Jami {total} ta karta</p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-dark-border bg-dark-surface text-gray-400 transition-colors hover:bg-white/5 disabled:opacity-30"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="text-xs text-gray-400">{page} / {totalPages}</span>
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-dark-border bg-dark-surface text-gray-400 transition-colors hover:bg-white/5 disabled:opacity-30"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        {!loading && <Pagination page={page} total={total} limit={LIMIT} label="ta karta" onChange={setPage} />}
       </div>
     </div>
     </>

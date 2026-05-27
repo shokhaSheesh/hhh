@@ -15,20 +15,20 @@ const STATIONS: Station[] = [
 ];
 
 function pctBadgeClass(pct: number) {
-  if (pct >= 70) return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-  if (pct >= 30) return 'bg-amber-500/20  text-amber-400  border-amber-500/30';
-  return                'bg-red-500/20    text-red-400    border-red-500/30';
+  if (pct >= 70) return 'bg-Color-Success-Success-Soft text-Color-Success-Success border-Color-Success-Success';
+  if (pct >= 30) return 'bg-Color-Warning-Warning-Soft text-Color-Warning-Warning border-Color-Warning-Warning';
+  return                'bg-Color-Danger-Danger-Soft text-Color-Danger-Danger-Accent border-Color-Danger-Danger-Accent';
 }
 
 export default function ActiveStationsList() {
   return (
-    <div className="flex flex-col rounded-2xl border border-dark-border bg-dark-surface">
+    <div className="flex flex-col rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4">
-        <span className="text-base font-semibold text-white">
+        <span className="text-base font-semibold text-Color-Grey-Grey-950">
           Stansiyalar holati
         </span>
-        <button className="text-sm text-gray-500 transition-colors hover:text-white">
+        <button className="text-sm text-Color-Grey-Grey-500 transition-colors hover:text-Color-Grey-Grey-950">
           Barchasini ko'rish
         </button>
       </div>
@@ -40,13 +40,13 @@ export default function ActiveStationsList() {
             key={st.id}
             className={[
               'flex items-center gap-3 px-5 py-3',
-              i < STATIONS.length - 1 ? 'border-b border-dark-border' : '',
+              i < STATIONS.length - 1 ? 'border-b border-Color-Grey-Grey-200' : '',
             ].join(' ')}
           >
             {/* Station info */}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white">{st.code}</p>
-              <p className="truncate text-xs text-gray-500">{st.location}</p>
+              <p className="text-sm font-semibold text-Color-Grey-Grey-950">{st.code}</p>
+              <p className="truncate text-xs text-Color-Grey-Grey-600">{st.location}</p>
             </div>
 
             {/* Percentage badge */}
@@ -60,7 +60,7 @@ export default function ActiveStationsList() {
             </span>
 
             {/* Battery count */}
-            <span className="w-20 shrink-0 text-right text-xs text-gray-400">
+            <span className="w-20 shrink-0 text-right text-xs text-Color-Grey-Grey-600">
               {st.batteryCount}ta batareya
             </span>
           </li>

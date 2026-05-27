@@ -9,8 +9,9 @@ export async function deleteCard(guid: string): Promise<void> {
 }
 
 interface UseCardsParams {
-  page:  number;
-  limit: number;
+  page:    number;
+  limit:   number;
+  userId?: string;
 }
 
 interface UseCardsResult {
@@ -20,7 +21,7 @@ interface UseCardsResult {
   error:   string | null;
 }
 
-export function useCards({ page, limit, tick = 0 }: UseCardsParams & { tick?: number }): UseCardsResult {
+export function useCards({ page, limit, userId, tick = 0 }: UseCardsParams & { tick?: number }): UseCardsResult {
   const [cards,   setCards]   = useState<Card[]>([]);
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
@@ -31,10 +32,11 @@ export function useCards({ page, limit, tick = 0 }: UseCardsParams & { tick?: nu
     setLoading(true);
     setError(null);
 
+    const body: Record<string, unknown> = { offset: (page - 1) * limit, limit };
+    if (userId) body['users_id'] = userId;
+
     api
-      .post<CardsListResponse>('/cards/items/list', {
-        data: { offset: (page - 1) * limit, limit },
-      })
+      .post<CardsListResponse>('/cards/items/list', { data: body })
       .then((res) => {
         if (cancelled) return;
         setCards(res.data.data.response ?? []);
@@ -48,7 +50,7 @@ export function useCards({ page, limit, tick = 0 }: UseCardsParams & { tick?: nu
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, tick]);
+  }, [page, limit, userId, tick]);
 
   return { cards, total, loading, error };
 }

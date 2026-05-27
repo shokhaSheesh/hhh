@@ -3,10 +3,11 @@ import { api } from '@/api/client';
 import type { User, UsersListResponse } from '@/types/user';
 
 interface UseUsersOptions {
-  page:   number;
-  limit:  number;
-  search: string;
-  tick?:  number;
+  page:    number;
+  limit:   number;
+  search:  string;
+  active?: boolean | null;
+  tick?:   number;
 }
 
 interface UseUsersResult {
@@ -16,7 +17,7 @@ interface UseUsersResult {
   error:   string | null;
 }
 
-export function useUsers({ page, limit, search, tick = 0 }: UseUsersOptions): UseUsersResult {
+export function useUsers({ page, limit, search, active, tick = 0 }: UseUsersOptions): UseUsersResult {
   const [users,   setUsers]   = useState<User[]>([]);
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,7 @@ export function useUsers({ page, limit, search, tick = 0 }: UseUsersOptions): Us
     const offset = (page - 1) * limit;
     const data: Record<string, unknown> = { offset, limit };
     if (search.trim()) data['search'] = search.trim();
+    if (active != null) data['active'] = active;
 
     api
       .post<UsersListResponse>('/users/items/list', { data })
@@ -49,7 +51,7 @@ export function useUsers({ page, limit, search, tick = 0 }: UseUsersOptions): Us
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, search, tick]);
+  }, [page, limit, search, active, tick]);
 
   return { users, total, loading, error };
 }

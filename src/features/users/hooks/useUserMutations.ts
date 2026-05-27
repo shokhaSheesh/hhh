@@ -1,7 +1,7 @@
 import { rootApi } from '@/api/client';
 import type { UCodeUserPayload } from '@/types/user';
 
-const ENDPOINT = '/v2/items/users?from-ofs=true';
+const ENDPOINT = '/v2/items/users';
 
 export async function createUser(payload: UCodeUserPayload): Promise<void> {
   await rootApi.post(ENDPOINT, payload);

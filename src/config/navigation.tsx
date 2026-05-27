@@ -9,14 +9,15 @@ import {
   Tag,
   Layers,
   Ticket,
+  Gift,
   MapPin,
-  Settings2,
   Plug,
   RefreshCw,
   BookOpen,
   HelpCircle,
-  Settings,
   BatteryFull,
+  CalendarCheck,
+  TriangleAlert,
 } from 'lucide-react';
 import type { NavGroup } from '@/types/navigation';
 
@@ -41,15 +42,17 @@ const MENU_ITEM = {
   cards:             '3abcfab4-6ac3-4848-9fa5-dad6f5bd08ca',
   tariffs:           '7e938887-d473-4730-814c-ef6a43e55662',
   tariffTypes:       'e5b7556e-8e6e-4f38-8147-f3c0ab3b39a7',
-  userOperations:    'e215f4bd-a8a0-43bd-9c54-eec3ba0a8ef0',
+  userOperations:    '4dddf63d-3125-46b4-bb0b-cc2e9e57086a',
   promocodes:        'c23f772e-8946-429f-871a-a787216ffc35',
   stations:          '6e1118c1-b051-4657-80e5-fbea2a4cf6a3',
   batteries:         '96d306f2-c7bf-4f25-86fe-309d1b54fdde',
-  batteryCategories: '7da9ec8d-ccd3-4f63-aba3-b6f1d9d9ed6f',
   portBindings:      'bbdcb468-87a5-4164-acfe-a2f8f4ca92b8',
   swaps:             'd8942801-c771-4907-bc02-a61c2c135859',
   documents:         '1ffcf6dc-18c5-41ec-86de-e4714f835d62',
   faq:               'c7f04907-4940-4664-ab1b-15c797afa20a',
+  coupons:           '5850b373-0f49-4a24-bd63-72552974368d',
+  subscriptions:     '985eb491-f3c0-4eeb-b993-be30df5d5614',
+  penalties:         '9821e527-030e-4c1e-91a6-c57f08ec31ec',
 } as const;
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -57,7 +60,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label:  'Asosiy',
     menuId: MENU_FOLDER.dashboard,
     items: [
-      { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+      { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, alwaysVisible: true },
     ],
   },
   {
@@ -79,12 +82,15 @@ export const NAV_GROUPS: NavGroup[] = [
     label:  "To'lovlar",
     menuId: MENU_FOLDER.payment,
     items: [
+      { label: 'Obunalar',                     path: '/payments/subscriptions',   icon: CalendarCheck,  menuId: MENU_ITEM.subscriptions  },
       { label: 'Tranzaksiyalar',              path: '/payments/transactions',    icon: ArrowRightLeft, menuId: MENU_ITEM.transactions   },
       { label: 'Kartalar',                    path: '/payments/cards',            icon: CreditCard,     menuId: MENU_ITEM.cards          },
       { label: 'Tariflar',                    path: '/payments/tariffs',          icon: Tag,            menuId: MENU_ITEM.tariffs         },
       { label: 'Tarif turlari',               path: '/payments/tariff-types',    icon: Layers,         menuId: MENU_ITEM.tariffTypes     },
+      { label: 'Kuponlar',                    path: '/payments/coupons',          icon: Gift,           menuId: MENU_ITEM.coupons         },
       { label: 'Promokodlar',                 path: '/payments/promo-codes',     icon: Ticket,         menuId: MENU_ITEM.promocodes      },
       { label: 'Foydalanuvchi operatsiyalari', path: '/payments/user-operations', icon: ArrowRightLeft, menuId: MENU_ITEM.userOperations  },
+      { label: 'Jarimalar',                   path: '/payments/penalties',       icon: TriangleAlert,  menuId: MENU_ITEM.penalties        },
     ],
   },
   {
@@ -92,9 +98,8 @@ export const NAV_GROUPS: NavGroup[] = [
     menuId: MENU_FOLDER.stations,
     items: [
       { label: 'Stansiyalar',         path: '/stations',      icon: MapPin,      menuId: MENU_ITEM.stations     },
-      { label: 'Batareyalar',         path: '/batteries',     icon: BatteryFull, menuId: MENU_ITEM.batteries    },
-      { label: 'Batareyalar turlari', path: '/battery-types', icon: Settings2,   menuId: MENU_ITEM.batteryCategories },
-      { label: 'Qurilma portlari',    path: '/ports',         icon: Plug,        menuId: MENU_ITEM.portBindings },
+      { label: 'Batareyalar',      path: '/batteries', icon: BatteryFull, menuId: MENU_ITEM.batteries    },
+      { label: 'Qurilma portlari', path: '/ports',     icon: Plug,        menuId: MENU_ITEM.portBindings },
     ],
   },
   {
@@ -110,7 +115,6 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Hujjatlar',                  path: '/extra/documents', icon: BookOpen,   menuId: MENU_ITEM.documents },
       { label: "Ko'p so'raladigan savollar", path: '/extra/faq',       icon: HelpCircle, menuId: MENU_ITEM.faq       },
-      { label: 'Sozlamalar',                 path: '/extra/settings',  icon: Settings   },
     ],
   },
 ];

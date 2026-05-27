@@ -28,16 +28,31 @@ export function usePorts({ page, limit, search }: UsePortsOptions): UsePortsResu
     setLoading(true);
     setError(null);
 
-    const offset = (page - 1) * limit;
-    const body: Record<string, unknown> = { offset, limit };
-    if (search.trim()) body['search'] = search.trim();
+    const q = search.trim().toLowerCase();
+    // API ignores search field — fetch all and filter client-side when searching
+    const body = q
+      ? { offset: 0, limit: 2000 }
+      : { offset: (page - 1) * limit, limit };
 
     portsApi
       .post<PortBindingsListResponse>('/device_ports/items/list', { data: body })
       .then((res) => {
         if (cancelled) return;
-        setPorts(res.data.data.response ?? []);
-        setTotal(res.data.data.count ?? 0);
+        const all = res.data.data.response ?? [];
+        if (q) {
+          const filtered = all.filter((p) => {
+            const sn   = p.batteries_id_data?.battery_sn.toLowerCase() ?? '';
+            const name = p.devices_id_data?.device_name.toLowerCase()  ?? '';
+            const code = p.devices_id_data?.device_code.toLowerCase()  ?? '';
+            const port = String(p.port);
+            return sn.includes(q) || name.includes(q) || code.includes(q) || port.includes(q);
+          });
+          setPorts(filtered.slice((page - 1) * limit, page * limit));
+          setTotal(filtered.length);
+        } else {
+          setPorts(all);
+          setTotal(res.data.data.count ?? 0);
+        }
         setLoading(false);
       })
       .catch((err: unknown) => {

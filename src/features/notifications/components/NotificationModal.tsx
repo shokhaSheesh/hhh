@@ -42,8 +42,8 @@ const EMPTY_FORM: FormState = {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const INPUT = 'w-full rounded-xl border border-dark-border bg-[#1E1E2D] px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500';
-const LABEL = 'block text-xs font-medium text-gray-500 mb-1.5';
+const INPUT = 'w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400';
+const LABEL = 'block text-xs font-medium text-Color-Grey-Grey-600 mb-1.5';
 
 // ─── Language column ──────────────────────────────────────────────────────────
 
@@ -62,10 +62,10 @@ function LangColumn({ header, titleVal, messageVal, titlePh, messagePh, onTitle,
   const messageEmpty = !messageVal.trim();
 
   return (
-    <div className="flex flex-1 flex-col gap-3 rounded-xl border border-dark-border bg-gray-900/30 p-4">
+    <div className="flex flex-1 flex-col gap-3 rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">{header}</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-700">{header}</span>
         {(titleEmpty || messageEmpty) && (
           <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
         )}
@@ -143,12 +143,12 @@ function UserSelect({ value, onChange }: {
 
   if (selected ?? (value && !selected)) {
     return (
-      <div className="flex items-center justify-between rounded-xl border border-dark-border bg-[#1E1E2D] px-4 py-2.5">
+      <div className="flex items-center justify-between rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5">
         <div>
-          <p className="text-sm font-medium text-white">{selected?.name || value}</p>
-          {selected?.phone && <p className="text-xs text-gray-500">{selected.phone}</p>}
+          <p className="text-sm font-medium text-Color-Grey-Grey-950">{selected?.name || value}</p>
+          {selected?.phone && <p className="text-xs text-Color-Grey-Grey-600">{selected.phone}</p>}
         </div>
-        <button type="button" onClick={clear} className="text-gray-500 transition-colors hover:text-white">
+        <button type="button" onClick={clear} className="text-Color-Grey-Grey-500 transition-colors hover:text-Color-Grey-Grey-950">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -157,7 +157,7 @@ function UserSelect({ value, onChange }: {
 
   return (
     <div ref={wrapRef} className="relative">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-Color-Grey-Grey-500" />
       <input
         type="text"
         value={search}
@@ -167,23 +167,23 @@ function UserSelect({ value, onChange }: {
         className={`${INPUT} pl-9`}
       />
       {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-48 overflow-y-auto rounded-xl border border-dark-border bg-[#16161D] shadow-2xl">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-48 overflow-y-auto rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl">
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-gray-500">
+            <div className="flex items-center justify-center gap-2 py-4 text-Color-Grey-Grey-600">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-xs">Qidirmoqda…</span>
             </div>
           ) : results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-600">Mijoz topilmadi</p>
+            <p className="px-4 py-3 text-sm text-Color-Grey-Grey-500">Mijoz topilmadi</p>
           ) : (
             results.map((u) => (
               <button key={u.guid} type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(u)}
-                className="flex w-full flex-col items-start px-4 py-2.5 text-left transition-colors hover:bg-white/5"
+                className="flex w-full flex-col items-start px-4 py-2.5 text-left transition-colors hover:bg-Color-Grey-Grey-50"
               >
-                <span className="text-sm font-medium text-white">{u.name || '—'}</span>
-                <span className="text-xs text-gray-500">{u.phone}</span>
+                <span className="text-sm font-medium text-Color-Grey-Grey-950">{u.name || '—'}</span>
+                <span className="text-xs text-Color-Grey-Grey-600">{u.phone}</span>
               </button>
             ))
           )}
@@ -256,22 +256,22 @@ export function NotificationModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden />
 
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-dark-border bg-dark-surface shadow-2xl">
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl">
 
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-dark-border px-6 py-4">
-          <h2 className="text-base font-semibold text-white">Kontent qo'shish</h2>
+        <div className="flex shrink-0 items-center justify-between border-b border-Color-Grey-Grey-200 px-6 py-4">
+          <h2 className="text-base font-semibold text-Color-Grey-Grey-950">Kontent qo'shish</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-gray-700 bg-gray-800 p-1.5 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+            className="rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Notification type tabs */}
-        <div className="flex shrink-0 border-b border-dark-border">
+        <div className="flex shrink-0 border-b border-Color-Grey-Grey-200">
           {NOTIF_TABS.map(({ key, label }) => (
             <button
               key={key}
@@ -280,8 +280,8 @@ export function NotificationModal({ onClose }: { onClose: () => void }) {
               className={[
                 'px-6 py-3 text-sm font-semibold transition-colors',
                 form.type === key
-                  ? 'border-b-2 border-brand-lime text-white'
-                  : 'border-b-2 border-transparent text-gray-500 hover:text-gray-300',
+                  ? 'border-b-2 border-Color-Primary-Primary text-Color-Grey-Grey-950'
+                  : 'border-b-2 border-transparent text-Color-Grey-Grey-500 hover:text-Color-Grey-Grey-700',
               ].join(' ')}
             >
               {label}
@@ -325,12 +325,12 @@ export function NotificationModal({ onClose }: { onClose: () => void }) {
 
           {/* File / link — Yangilik only */}
           {isNews && (
-            <div className="grid grid-cols-2 gap-4 border-t border-dark-border px-6 py-5">
+            <div className="grid grid-cols-2 gap-4 border-t border-Color-Grey-Grey-200 px-6 py-5">
               <div>
                 <label className={LABEL}>Fayl</label>
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-dark-border bg-[#1E1E2D] px-4 py-3 transition-colors hover:border-gray-500">
-                  <Upload className="h-4 w-4 shrink-0 text-gray-500" />
-                  <span className="text-sm text-gray-500">Fayl yuklash</span>
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-3 transition-colors hover:border-Color-Grey-Grey-400">
+                  <Upload className="h-4 w-4 shrink-0 text-Color-Grey-Grey-500" />
+                  <span className="text-sm text-Color-Grey-Grey-500">Fayl yuklash</span>
                   <input type="file" className="sr-only" />
                 </label>
               </div>
@@ -349,14 +349,14 @@ export function NotificationModal({ onClose }: { onClose: () => void }) {
 
           {/* Recipient — Bildirishnoma only */}
           {!isNews && (
-            <div className="border-t border-dark-border px-6 py-5">
+            <div className="border-t border-Color-Grey-Grey-200 px-6 py-5">
               <label className={LABEL}>Qabul qiluvchi (ixtiyoriy)</label>
               <UserSelect
                 value={form.users_id}
                 onChange={(id) => set('users_id', id)}
               />
               {!form.users_id && (
-                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-600">
+                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-Color-Grey-Grey-500">
                   <Users className="h-3 w-3" />
                   Tanlanmasa — barcha foydalanuvchilarga yuboriladi
                 </p>
@@ -365,9 +365,9 @@ export function NotificationModal({ onClose }: { onClose: () => void }) {
           )}
 
           {/* Footer */}
-          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-dark-border px-6 py-4">
+          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-Color-Grey-Grey-200 px-6 py-4">
             {error ? (
-              <p className="text-xs text-red-400">{error}</p>
+              <p className="text-xs text-Color-Danger-Danger-Accent">{error}</p>
             ) : (
               <span />
             )}
@@ -376,19 +376,19 @@ export function NotificationModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="rounded-xl border border-gray-700 px-6 py-2.5 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5 disabled:opacity-50"
+                className="rounded-xl border border-Color-Grey-Grey-200 px-6 py-2.5 text-sm font-semibold text-Color-Grey-Grey-700 transition-colors hover:bg-Color-Grey-Grey-50 disabled:opacity-50"
               >
                 Bekor qilish
               </button>
               <button
                 type="submit"
                 disabled={loading || saved || !canSubmit}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-lime px-6 py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-Color-Info-Info-Accent px-6 py-2.5 text-sm font-bold text-Color-Light-Constant-White transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {saved ? (
                   <><Check className="h-4 w-4" /> Saqlandi!</>
                 ) : loading ? (
-                  <><span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" /> Saqlanmoqda…</>
+                  <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Saqlanmoqda…</>
                 ) : (
                   'Saqlash'
                 )}

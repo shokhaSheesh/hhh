@@ -5,9 +5,11 @@ import type { Notification, NotificationsListResponse } from '@/types/notificati
 const notificationsApi = createApi(VIEW.notifications);
 
 interface UseNotificationsParams {
-  page:   number;
-  limit:  number;
-  search: string;
+  page:     number;
+  limit:    number;
+  search:   string;
+  userId?:  string;
+  typeFilter?: string | null;
 }
 
 interface UseNotificationsResult {
@@ -17,7 +19,7 @@ interface UseNotificationsResult {
   error:         string | null;
 }
 
-export function useNotifications({ page, limit, search }: UseNotificationsParams): UseNotificationsResult {
+export function useNotifications({ page, limit, search, userId, typeFilter }: UseNotificationsParams): UseNotificationsResult {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [total,         setTotal]         = useState(0);
   const [loading,       setLoading]       = useState(true);
@@ -28,11 +30,10 @@ export function useNotifications({ page, limit, search }: UseNotificationsParams
     setLoading(true);
     setError(null);
 
-    const body: Record<string, unknown> = {
-      offset: (page - 1) * limit,
-      limit,
-    };
+    const body: Record<string, unknown> = { offset: (page - 1) * limit, limit };
     if (search.trim()) body['search'] = search.trim();
+    if (userId) body['users_id'] = userId;
+    if (typeFilter) body['type'] = [typeFilter];
 
     notificationsApi
       .post<NotificationsListResponse>('/notifications/items/list', { data: body })
@@ -49,7 +50,7 @@ export function useNotifications({ page, limit, search }: UseNotificationsParams
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, search]);
+  }, [page, limit, search, userId, typeFilter]);
 
   return { notifications, total, loading, error };
 }

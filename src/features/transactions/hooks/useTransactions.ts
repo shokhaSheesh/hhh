@@ -5,8 +5,9 @@ import type { Transaction, TransactionsListResponse } from '@/types/transactions
 const api = createApi(VIEW.transactions);
 
 interface UseTransactionsParams {
-  page:  number;
-  limit: number;
+  page:   number;
+  limit:  number;
+  userId?: string;
 }
 
 interface UseTransactionsResult {
@@ -16,7 +17,7 @@ interface UseTransactionsResult {
   error:        string | null;
 }
 
-export function useTransactions({ page, limit }: UseTransactionsParams): UseTransactionsResult {
+export function useTransactions({ page, limit, userId }: UseTransactionsParams): UseTransactionsResult {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [total,        setTotal]        = useState(0);
   const [loading,      setLoading]      = useState(true);
@@ -27,10 +28,11 @@ export function useTransactions({ page, limit }: UseTransactionsParams): UseTran
     setLoading(true);
     setError(null);
 
+    const body: Record<string, unknown> = { offset: (page - 1) * limit, limit };
+    if (userId) body['users_id'] = userId;
+
     api
-      .post<TransactionsListResponse>('/transactions/items/list', {
-        data: { offset: (page - 1) * limit, limit },
-      })
+      .post<TransactionsListResponse>('/transactions/items/list', { data: body })
       .then((res) => {
         if (cancelled) return;
         setTransactions(res.data.data.response ?? []);
@@ -44,7 +46,7 @@ export function useTransactions({ page, limit }: UseTransactionsParams): UseTran
       });
 
     return () => { cancelled = true; };
-  }, [page, limit]);
+  }, [page, limit, userId]);
 
   return { transactions, total, loading, error };
 }

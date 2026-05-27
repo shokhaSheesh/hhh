@@ -111,5 +111,5 @@ export interface UCodeUserPayload {
     passport_serial_number?: string;
     pinfl?:                  string;
   };
-  disable_faas: boolean;
+  disable_faas?: boolean;
 }

@@ -43,13 +43,13 @@ function fromTariff(t: Tariff): TariffFormValues {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">{label}</label>
+      <label className="text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600">{label}</label>
       {children}
     </div>
   );
 }
 
-const INPUT = 'w-full rounded-xl border border-gray-700 bg-[#1E1E2D] px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500';
+const INPUT = 'w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400';
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -59,7 +59,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        checked ? 'bg-brand-lime' : 'bg-gray-700'
+        checked ? 'bg-Color-Primary-Primary' : 'bg-Color-Grey-Grey-400'
       }`}
     >
       <span
@@ -142,7 +142,7 @@ export default function TariffForm({ initial, onSave, onCancel, saveLabel = 'Saq
           <div className="flex items-center gap-2">
             {/* Colored swatch — transparent color picker sits on top */}
             <div
-              className="relative h-[42px] w-11 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-gray-700"
+              className="relative h-[42px] w-11 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-Color-Grey-Grey-200"
               style={{ backgroundColor: previewColor }}
             >
               <input
@@ -161,7 +161,7 @@ export default function TariffForm({ initial, onSave, onCancel, saveLabel = 'Saq
               className={`${INPUT} font-mono`}
             />
             <div
-              className="h-5 w-5 shrink-0 rounded-full border border-gray-700"
+              className="h-5 w-5 shrink-0 rounded-full border border-Color-Grey-Grey-200"
               style={{ backgroundColor: previewColor }}
             />
           </div>
@@ -208,10 +208,10 @@ export default function TariffForm({ initial, onSave, onCancel, saveLabel = 'Saq
       </div>
 
       {/* Base tariff toggle */}
-      <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-[#1E1E2D] px-4 py-3.5">
+      <div className="flex items-center justify-between rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-3.5">
         <div>
-          <p className="text-sm font-medium text-white">Asosiy tarif</p>
-          <p className="mt-0.5 text-xs text-gray-500">Bu tarif yangi foydalanuvchilarga avtomatik tayinlanadi</p>
+          <p className="text-sm font-medium text-Color-Grey-Grey-950">Asosiy tarif</p>
+          <p className="mt-0.5 text-xs text-Color-Grey-Grey-600">Bu tarif yangi foydalanuvchilarga avtomatik tayinlanadi</p>
         </div>
         <Toggle checked={values.base_tariff} onChange={(v) => set('base_tariff', v)} />
       </div>
@@ -221,13 +221,13 @@ export default function TariffForm({ initial, onSave, onCancel, saveLabel = 'Saq
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border border-gray-700 px-5 py-2.5 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5"
+          className="rounded-xl border border-Color-Grey-Grey-200 px-5 py-2.5 text-sm font-semibold text-Color-Grey-Grey-700 transition-colors hover:bg-Color-Grey-Grey-50"
         >
           Bekor qilish
         </button>
         <button
           type="submit"
-          className="rounded-xl bg-brand-lime px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90"
+          className="rounded-xl bg-Color-Primary-Primary px-5 py-2.5 text-sm font-semibold text-Color-Dark-Constant-Dark transition-opacity hover:opacity-90"
         >
           {saveLabel}
         </button>

@@ -6,11 +6,11 @@ import type { Appeal, AppealStatus } from '@/types/appeals';
 // ─── Status config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<AppealStatus, { label: string; dot: string; badge: string }> = {
-  new:         { label: 'Yangi',        dot: 'bg-orange-400',  badge: 'border-orange-500/30 bg-orange-500/10 text-orange-400'    },
-  in_progress: { label: 'Jarayonda',    dot: 'bg-amber-400',   badge: 'border-amber-500/30  bg-amber-500/10  text-amber-400'     },
-  solved:      { label: 'Hal qilingan', dot: 'bg-emerald-400', badge: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' },
-  closed:      { label: 'Yopilgan',     dot: 'bg-gray-500',    badge: 'border-gray-700 bg-gray-800 text-gray-500'                },
-  ignored:     { label: "E'tiborsiz",   dot: 'bg-gray-500',    badge: 'border-gray-500/20 bg-gray-500/10 text-gray-400'          },
+  new:         { label: 'Yangi',        dot: 'bg-orange-400',          badge: 'border-Color-Warning-Warning bg-Color-Warning-Warning-Soft text-Color-Warning-Warning'   },
+  in_progress: { label: 'Jarayonda',    dot: 'bg-amber-400',           badge: 'border-Color-Warning-Warning bg-Color-Warning-Warning-Soft text-Color-Warning-Warning'   },
+  solved:      { label: 'Hal qilingan', dot: 'bg-emerald-400',         badge: 'border-Color-Success-Success bg-Color-Success-Success-Soft text-Color-Success-Success'   },
+  closed:      { label: 'Yopilgan',     dot: 'bg-Color-Grey-Grey-400', badge: 'border-Color-Grey-Grey-200 bg-Color-Grey-Grey-100 text-Color-Grey-Grey-600'              },
+  ignored:     { label: "E'tiborsiz",   dot: 'bg-Color-Grey-Grey-400', badge: 'border-Color-Grey-Grey-200 bg-Color-Grey-Grey-100 text-Color-Grey-Grey-600'              },
 };
 
 const ALL_STATUSES: AppealStatus[] = ['new', 'in_progress', 'solved', 'closed'];
@@ -34,13 +34,13 @@ function InfoRow({ icon: Icon, label, value }: {
   icon: React.ElementType; label: string; value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3 border-b border-dark-border/60 py-3 last:border-0">
-      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-800">
-        <Icon className="h-3.5 w-3.5 text-gray-400" />
+    <div className="flex items-start gap-3 border-b border-Color-Grey-Grey-200 py-3 last:border-0">
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-Color-Grey-Grey-100">
+        <Icon className="h-3.5 w-3.5 text-Color-Grey-Grey-600" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="mt-0.5 break-all text-sm font-medium text-white">{value}</p>
+        <p className="text-xs text-Color-Grey-Grey-600">{label}</p>
+        <p className="mt-0.5 break-all text-sm font-medium text-Color-Grey-Grey-950">{value}</p>
       </div>
     </div>
   );
@@ -88,15 +88,15 @@ export function AppealModal({ appeal, onClose, onSuccess }: {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden />
 
       <div
-        className="relative flex w-full max-w-[860px] flex-col overflow-hidden rounded-2xl border border-dark-border bg-dark-surface shadow-2xl"
+        className="relative flex w-full max-w-[860px] flex-col overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 shadow-2xl"
         style={{ maxHeight: '88vh' }}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-dark-border px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-Color-Grey-Grey-200 px-6 py-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold text-white">
+            <h2 className="text-base font-semibold text-Color-Grey-Grey-950">
               Murojaat{' '}
-              <span className="font-mono text-gray-400">#{appeal.guid.slice(-8).toUpperCase()}</span>
+              <span className="font-mono text-Color-Grey-Grey-600">#{appeal.guid.slice(-8).toUpperCase()}</span>
             </h2>
             <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cfg.badge}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
@@ -105,7 +105,7 @@ export function AppealModal({ appeal, onClose, onSuccess }: {
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg border border-gray-700 bg-gray-800 p-1.5 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+            className="rounded-lg border border-Color-Grey-Grey-200 bg-Color-Light-Light p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950"
           >
             <X className="h-4 w-4" />
           </button>
@@ -114,18 +114,18 @@ export function AppealModal({ appeal, onClose, onSuccess }: {
         {/* Body */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
           {/* Left panel — user info + message */}
-          <div className="flex w-[320px] shrink-0 flex-col overflow-y-auto border-r border-dark-border">
+          <div className="flex w-[320px] shrink-0 flex-col overflow-y-auto border-r border-Color-Grey-Grey-200">
             {/* Avatar + name */}
-            <div className="border-b border-dark-border p-5">
+            <div className="border-b border-Color-Grey-Grey-200 p-5">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-lime/10 text-base font-bold text-brand-lime">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-Color-Primary-Primary/10 text-base font-bold text-Color-Primary-Primary">
                   {initials(appeal.name)}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold capitalize text-white">
+                  <p className="truncate text-sm font-semibold capitalize text-Color-Grey-Grey-950">
                     {appeal.name.toLowerCase()}
                   </p>
-                  <p className="font-mono text-xs text-gray-400">{appeal.phone}</p>
+                  <p className="font-mono text-xs text-Color-Grey-Grey-600">{appeal.phone}</p>
                 </div>
               </div>
             </div>
@@ -145,23 +145,23 @@ export function AppealModal({ appeal, onClose, onSuccess }: {
           {/* Right panel — message + status */}
           <div className="flex flex-1 flex-col overflow-y-auto">
             {/* Message */}
-            <div className="border-b border-dark-border p-5">
+            <div className="border-b border-Color-Grey-Grey-200 p-5">
               <div className="mb-3 flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-gray-500" />
-                <h3 className="text-sm font-semibold text-white">Murojaat matni</h3>
+                <MessageSquare className="h-4 w-4 text-Color-Grey-Grey-600" />
+                <h3 className="text-sm font-semibold text-Color-Grey-Grey-950">Murojaat matni</h3>
               </div>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-300">
-                {appeal.description || <span className="italic text-gray-600">Matn yo'q</span>}
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-Color-Grey-Grey-700">
+                {appeal.description || <span className="italic text-Color-Grey-Grey-500">Matn yo'q</span>}
               </p>
             </div>
 
             {/* Status management */}
             <div className="p-5">
-              <h3 className="mb-3 text-sm font-semibold text-white">Holat boshqaruvi</h3>
+              <h3 className="mb-3 text-sm font-semibold text-Color-Grey-Grey-950">Holat boshqaruvi</h3>
 
               {/* Current badge */}
-              <div className="mb-3 flex items-center justify-between rounded-xl bg-gray-900/50 px-4 py-3">
-                <span className="text-xs text-gray-500">Joriy holat</span>
+              <div className="mb-3 flex items-center justify-between rounded-xl bg-Color-Grey-Grey-50 px-4 py-3">
+                <span className="text-xs text-Color-Grey-Grey-600">Joriy holat</span>
                 <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cfg.badge}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
                   {cfg.label}
@@ -179,14 +179,14 @@ export function AppealModal({ appeal, onClose, onSuccess }: {
                       onClick={() => setStatus(s)}
                       className={`flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                         active
-                          ? 'border-brand-lime/30 bg-brand-lime/10 text-white'
-                          : 'border-dark-border bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
+                          ? 'border-Color-Primary-Primary bg-Color-Primary-Primary/10 text-Color-Grey-Grey-950'
+                          : 'border-Color-Grey-Grey-200 bg-transparent text-Color-Grey-Grey-700 hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950'
                       }`}
                     >
                       <span className={`h-2 w-2 shrink-0 rounded-full ${c.dot}`} />
                       {c.label}
                       {active && (
-                        <span className="ml-auto rounded-full bg-brand-lime/20 px-1.5 py-0.5 text-[10px] font-bold text-brand-lime">
+                        <span className="ml-auto rounded-full bg-Color-Primary-Primary/20 px-1.5 py-0.5 text-[10px] font-bold text-Color-Primary-Primary">
                           Joriy
                         </span>
                       )}
@@ -195,11 +195,11 @@ export function AppealModal({ appeal, onClose, onSuccess }: {
                 })}
               </div>
 
-              {saveErr && <p className="mt-2 text-xs text-red-400">{saveErr}</p>}
+              {saveErr && <p className="mt-2 text-xs text-Color-Danger-Danger-Accent">{saveErr}</p>}
               <button
                 onClick={handleSave}
                 disabled={saving || saved || status === currentStatus}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-lime py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-Color-Info-Info-Accent py-2.5 text-sm font-bold text-Color-Light-Constant-White transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {saved   ? <><Check className="h-4 w-4" /> Saqlandi!</>
                : saving  ? <><Loader2 className="h-4 w-4 animate-spin" /> Saqlanmoqda…</>

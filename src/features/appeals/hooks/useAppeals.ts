@@ -5,10 +5,11 @@ import type { Appeal, AppealsListResponse } from '@/types/appeals';
 const appealsApi = createApi(VIEW.appeals);
 
 interface UseAppealsOptions {
-  page:   number;
-  limit:  number;
-  search: string;
-  tick?:  number;
+  page:     number;
+  limit:    number;
+  search:   string;
+  status?:  string | null;
+  tick?:    number;
 }
 
 interface UseAppealsResult {
@@ -18,7 +19,7 @@ interface UseAppealsResult {
   error:   string | null;
 }
 
-export function useAppeals({ page, limit, search, tick = 0 }: UseAppealsOptions): UseAppealsResult {
+export function useAppeals({ page, limit, search, status, tick = 0 }: UseAppealsOptions): UseAppealsResult {
   const [appeals, setAppeals] = useState<Appeal[]>([]);
   const [total,   setTotal]   = useState(0);
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,7 @@ export function useAppeals({ page, limit, search, tick = 0 }: UseAppealsOptions)
     const offset = (page - 1) * limit;
     const data: Record<string, unknown> = { offset, limit };
     if (search.trim()) data['search'] = search.trim();
+    if (status) data['status'] = [status];
 
     appealsApi
       .post<AppealsListResponse>('/requests/items/list', { data })
@@ -48,7 +50,7 @@ export function useAppeals({ page, limit, search, tick = 0 }: UseAppealsOptions)
       });
 
     return () => { cancelled = true; };
-  }, [page, limit, search, tick]);
+  }, [page, limit, search, status, tick]);
 
   return { appeals, total, loading, error };
 }

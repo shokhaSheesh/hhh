@@ -50,24 +50,24 @@ export default function PromocodeModal({ initial, onClose, onSuccess }: Props) {
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-dark-border bg-[#16161D] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-dark-border px-6 py-4">
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl">
+        <div className="flex items-center justify-between border-b border-Color-Grey-Grey-200 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-lime/10">
-              <Ticket className="h-4 w-4 text-brand-lime" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-Color-Primary-Primary/10">
+              <Ticket className="h-4 w-4 text-Color-Primary-Primary" />
             </div>
-            <h2 className="text-base font-semibold text-white">
+            <h2 className="text-base font-semibold text-Color-Grey-Grey-950">
               {isEdit ? 'Promokodni tahrirlash' : "Promokod qo'shish"}
             </h2>
           </div>
           <button onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-white/10 hover:text-white">
+            className="rounded-lg p-1.5 text-Color-Grey-Grey-500 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="p-6">
-          {error && <p className="mb-4 rounded-xl bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{error}</p>}
+          {error && <p className="mb-4 rounded-xl bg-Color-Danger-Danger-Soft px-4 py-2.5 text-sm text-Color-Danger-Danger-Accent">{error}</p>}
           <PromocodeForm
             initial={initial}
             onSave={handleSave}

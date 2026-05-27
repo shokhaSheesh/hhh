@@ -31,6 +31,25 @@ export async function updatePromocode(guid: string, data: CreatePromocodePayload
   });
 }
 
+export async function updatePromocodeStatus(promo: import('@/types/promocodes').Promocode, status: boolean): Promise<void> {
+  await rootApi.put('/v2/items/promocodes?from-ofs=true', {
+    data: {
+      guid:                promo.guid,
+      key:                 promo.key,
+      amount:              promo.amount ?? 0,
+      discount_percentage: promo.discount_percentage ?? 0,
+      infinite:            promo.infinite,
+      special:             promo.special,
+      status,
+      user_count:          promo.user_count ?? 0,
+      use_count_per_user:  promo.use_count_per_user,
+      users_id:            promo.users_id ?? null,
+      valid_until:         promo.valid_until ?? null,
+    },
+    disable_faas: true,
+  });
+}
+
 export async function deletePromocode(guid: string): Promise<void> {
   await rootApi.delete(`/v2/items/promocodes/${guid}?from-ofs=true`, { data: { data: {} } });
 }

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
-  Search, Download, SlidersHorizontal,
+  Search, Download,
   ChevronLeft, ChevronRight, ChevronDown,
   AlertCircle, FileText, FolderOpen, CheckCircle,
   Check, X,
 } from 'lucide-react';
+import { FilterDropdown } from '@/components/FilterDropdown';
 import { useAppeals, updateAppealStatus } from './hooks/useAppeals';
 import { useDebounce } from '@/hooks/useDebounce';
 import { AppealModal } from './components/AppealModal';
@@ -17,11 +19,12 @@ const PAGE_SIZE = 15;
 function fmtDate(iso: string) {
   if (!iso) return '—';
   try {
-    const d = new Date(iso);
+    const utc = /Z|[+-]\d\d:\d\d$/.test(iso) ? iso : iso + 'Z';
     return new Intl.DateTimeFormat('ru-RU', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
-    }).format(d);
+      timeZone: 'Asia/Tashkent',
+    }).format(new Date(utc));
   } catch { return iso; }
 }
 
@@ -34,24 +37,10 @@ function shortId(guid: string) {
 // UI selector keys (what the dropdown value holds)
 type UiStatus = 'YANGI' | 'BAJARILDI' | 'RAD_ETILDI';
 
-// Maps UI keys → strict backend slugs
-const STATUS_MAP: Record<UiStatus, string> = {
-  YANGI:      'new',
-  BAJARILDI:  'solved',
-  RAD_ETILDI: 'ignored',
-};
-
-// Maps backend slugs → display config (for reading GET responses)
-const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  new:     { label: 'Yangi',      cls: 'border-blue-500/20 bg-blue-500/10 text-blue-400'       },
-  solved:  { label: 'Bajarildi',  cls: 'border-green-500/20 bg-green-500/10 text-green-400'    },
-  ignored: { label: "Rad etildi", cls: 'border-red-500/20 bg-red-500/10 text-red-400'          },
-};
-
-const STATUS_OPTIONS: { value: UiStatus; label: string }[] = [
-  { value: 'YANGI',      label: 'Yangi'      },
-  { value: 'BAJARILDI',  label: 'Bajarildi'  },
-  { value: 'RAD_ETILDI', label: "Rad etildi" },
+const STATUS_OPTIONS: { value: UiStatus; label: string; badgeCls: string; dot: string }[] = [
+  { value: 'YANGI',      label: 'Yangi',      badgeCls: 'border-Color-Info-Info bg-Color-Info-Info-Soft text-Color-Info-Info',                              dot: 'bg-Color-Info-Info'            },
+  { value: 'BAJARILDI',  label: 'Bajarildi',  badgeCls: 'border-Color-Success-Success bg-Color-Success-Success-Soft text-Color-Success-Success',             dot: 'bg-Color-Success-Success'      },
+  { value: 'RAD_ETILDI', label: 'Rad etildi', badgeCls: 'border-Color-Danger-Danger-Accent bg-Color-Danger-Danger-Soft text-Color-Danger-Danger-Accent',    dot: 'bg-Color-Danger-Danger-Accent' },
 ];
 
 // Convert backend slug → UI key for the dropdown initial value
@@ -64,37 +53,72 @@ function toUiStatus(backendSlug: string): UiStatus {
   return map[backendSlug] ?? 'YANGI';
 }
 
-function getStatusCls(uiStatus: UiStatus): string {
-  const backendSlug = STATUS_MAP[uiStatus] ?? 'new';
-  return STATUS_LABELS[backendSlug]?.cls ?? STATUS_LABELS['new'].cls;
-}
-
 // ─── Status dropdown ──────────────────────────────────────────────────────────
 
-function StatusDropdown({
-  value,
-  onChange,
-}: {
-  value: UiStatus;
-  onChange: (v: UiStatus) => void;
-}) {
+function StatusDropdown({ value, onChange }: { value: UiStatus; onChange: (v: UiStatus) => void }) {
+  const [open, setOpen] = useState(false);
+  const [pos,  setPos]  = useState<{ top: number; left: number; width: number } | null>(null);
+  const btnRef  = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const current = STATUS_OPTIONS.find((o) => o.value === value) ?? STATUS_OPTIONS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (listRef.current && !listRef.current.contains(t)) setOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  function handleOpen(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 6, left: r.left, width: Math.max(r.width, 160) });
+    }
+    setOpen((v) => !v);
+  }
+
   return (
-    <div
-      className="relative inline-flex"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as UiStatus)}
-        className={`appearance-none cursor-pointer rounded-full border py-0.5 pl-2.5 pr-6 text-xs font-medium outline-none transition-colors ${getStatusCls(value)}`}
+    <div>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={handleOpen}
+        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80 ${current.badgeCls}`}
       >
-        {STATUS_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value} className="bg-gray-900 text-white">
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 opacity-60" />
+        <span className={`h-1.5 w-1.5 rounded-full ${current.dot}`} />
+        {current.label}
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && pos && createPortal(
+        <div
+          ref={listRef}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
+          className="overflow-hidden rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl"
+        >
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onChange(opt.value); setOpen(false); }}
+              className={`flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors hover:bg-Color-Grey-Grey-50 ${
+                opt.value === value ? opt.badgeCls.split(' ').find(c => c.startsWith('text-')) + ' font-semibold' : 'text-Color-Grey-Grey-700'
+              }`}
+            >
+              <span className={`h-2 w-2 shrink-0 rounded-full ${opt.dot}`} />
+              {opt.label}
+              {opt.value === value && <Check className="ml-auto h-3.5 w-3.5" />}
+            </button>
+          ))}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
@@ -111,8 +135,8 @@ function ToastList({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: num
           key={t.id}
           className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-2xl ${
             t.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-              : 'border-red-500/30 bg-red-500/10 text-red-400'
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+              : 'border-red-300 bg-red-50 text-red-600'
           }`}
         >
           {t.type === 'success'
@@ -134,10 +158,10 @@ function StatCard({
   label, value, icon: Icon, iconBg,
 }: { label: string; value: number | string; icon: React.ElementType; iconBg: string }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-dark-border bg-dark-surface p-4">
+    <div className="flex items-center justify-between rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light p-4">
       <div>
-        <p className="text-sm text-gray-400">{label}</p>
-        <p className="mt-1 text-2xl font-semibold text-white">{value} ta</p>
+        <p className="text-sm text-Color-Grey-Grey-600">{label}</p>
+        <p className="mt-1 text-2xl font-semibold text-Color-Grey-Grey-950">{value} ta</p>
       </div>
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
         <Icon className="h-5 w-5 text-white" />
@@ -171,18 +195,18 @@ function DataRow({
     <div
       role="button"
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-6 border-b border-dark-border px-4 py-4 transition-colors hover:bg-white/[0.04]"
+      className="flex cursor-pointer items-center gap-6 border-b border-Color-Grey-Grey-200 px-4 py-4 transition-colors hover:bg-Color-Grey-Grey-50"
     >
-      <span className={`${COL.id} font-mono text-sm font-semibold text-white`}>
+      <span className={`${COL.id} font-mono text-sm font-semibold text-Color-Grey-Grey-950`}>
         {shortId(appeal.guid)}
       </span>
       <div className={`${COL.user} min-w-0`}>
-        <p className="truncate text-sm font-semibold capitalize text-white">
+        <p className="truncate text-sm font-semibold capitalize text-Color-Grey-Grey-950">
           {appeal.name.toLowerCase()}
         </p>
-        <p className="font-mono text-xs text-gray-500">{appeal.phone}</p>
+        <p className="font-mono text-xs text-Color-Grey-Grey-600">{appeal.phone}</p>
       </div>
-      <p className={`${COL.msg} truncate text-sm text-gray-300`}>
+      <p className={`${COL.msg} truncate text-sm text-Color-Grey-Grey-700`}>
         {appeal.description}
       </p>
       <div className={COL.status}>
@@ -191,7 +215,7 @@ function DataRow({
           onChange={(v) => onStatusChange(appeal.guid, v)}
         />
       </div>
-      <span className={`${COL.time} font-mono text-xs text-gray-400`}>
+      <span className={`${COL.time} font-mono text-xs text-Color-Grey-Grey-600`}>
         {fmtDate(appeal.created_at)}
       </span>
     </div>
@@ -204,15 +228,15 @@ function SkeletonRows() {
   return (
     <>
       {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-        <div key={i} className="flex items-center gap-6 border-b border-dark-border px-4 py-4">
-          <div className={`${COL.id} h-4 animate-pulse rounded bg-gray-800`} />
+        <div key={i} className="flex items-center gap-6 border-b border-Color-Grey-Grey-200 px-4 py-4">
+          <div className={`${COL.id} h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
           <div className={`${COL.user} space-y-1.5`}>
-            <div className="h-4 w-32 animate-pulse rounded bg-gray-800" />
-            <div className="h-3 w-20 animate-pulse rounded bg-gray-800" />
+            <div className="h-4 w-32 animate-pulse rounded bg-Color-Grey-Grey-200" />
+            <div className="h-3 w-20 animate-pulse rounded bg-Color-Grey-Grey-200" />
           </div>
-          <div className={`${COL.msg} h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.status} h-6 w-24 animate-pulse rounded-full bg-gray-800`} />
-          <div className={`${COL.time} h-4 animate-pulse rounded bg-gray-800`} />
+          <div className={`${COL.msg} h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.status} h-6 w-24 animate-pulse rounded-full bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.time} h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
         </div>
       ))}
     </>
@@ -239,29 +263,29 @@ function Pagination({ page, total, pageSize, onChange }: {
   if (totalPages > 1) add(totalPages);
 
   return (
-    <div className="flex items-center justify-between border-t border-dark-border px-6 py-4">
-      <span className="text-xs text-gray-500">
+    <div className="flex items-center justify-between border-t border-Color-Grey-Grey-200 px-6 py-4">
+      <span className="text-xs text-Color-Grey-Grey-600">
         {from}–{to} / {total.toLocaleString('ru-RU')} murojaat
       </span>
       <div className="flex items-center gap-1">
         <button onClick={() => onChange(page - 1)} disabled={page === 1}
-          className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-30">
+          className="rounded-lg p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 disabled:cursor-not-allowed disabled:opacity-30">
           <ChevronLeft className="h-4 w-4" />
         </button>
         {pages.map((p, i) =>
           p === '...' ? (
-            <span key={`e${i}`} className="px-1 text-xs text-gray-600">…</span>
+            <span key={`e${i}`} className="px-1 text-xs text-Color-Grey-Grey-400">…</span>
           ) : (
             <button key={p} onClick={() => onChange(p as number)}
               className={['h-7 min-w-[28px] rounded-lg px-2 text-xs font-medium transition-colors',
-                p === page ? 'bg-[#D1F22D] text-black' : 'text-gray-400 hover:bg-white/5',
+                p === page ? 'bg-Color-Primary-Primary text-Color-Dark-Constant-Dark' : 'text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-100',
               ].join(' ')}>
               {p}
             </button>
           )
         )}
         <button onClick={() => onChange(page + 1)} disabled={page === Math.ceil(total / pageSize)}
-          className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-30">
+          className="rounded-lg p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 disabled:cursor-not-allowed disabled:opacity-30">
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -290,11 +314,12 @@ export default function AppealsPage() {
   const [tick,           setTick]          = useState(0);
   const [localStatuses,  setLocalStatuses] = useState<Record<string, UiStatus>>({});
   const [toasts,         setToasts]        = useState<Toast[]>([]);
+  const [statusFilter,   setStatusFilter]  = useState<string | null>(null);
   const search = useDebounce(rawSearch, 400);
 
   const handleSearch = (v: string) => { setRawSearch(v); setPage(1); };
 
-  const { appeals, total, loading, error } = useAppeals({ page, limit: PAGE_SIZE, search, tick });
+  const { appeals, total, loading, error } = useAppeals({ page, limit: PAGE_SIZE, search, status: statusFilter, tick });
 
   function addToast(type: Toast['type'], message: string) {
     const id = ++_toastId;
@@ -356,16 +381,16 @@ export default function AppealsPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight text-white">Murojaatlar</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-Color-Grey-Grey-950">Murojaatlar</h1>
               {total > 0 && (
-                <span className="rounded-full bg-gray-800 px-2.5 py-0.5 text-xs font-semibold text-gray-400">
+                <span className="rounded-full bg-Color-Grey-Grey-100 px-2.5 py-0.5 text-xs font-semibold text-Color-Grey-Grey-600">
                   {total.toLocaleString('ru-RU')}
                 </span>
               )}
             </div>
-            <p className="mt-1 text-sm text-gray-400">Foydalanuvchilarning murojaatlari va so'rovlari</p>
+            <p className="mt-1 text-sm text-Color-Grey-Grey-600">Foydalanuvchilarning murojaatlari va so'rovlari</p>
           </div>
-          <button className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#D1F22D] px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90">
+          <button className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-Color-Info-Info-Accent px-5 py-2.5 text-sm font-semibold text-Color-Light-Constant-White transition-opacity hover:opacity-90">
             <Download className="h-4 w-4" />
             Eksport
           </button>
@@ -380,61 +405,59 @@ export default function AppealsPage() {
         </div>
 
         {/* ── Table card ──────────────────────────────────────────────────── */}
-        <div className="overflow-hidden rounded-2xl border border-dark-border bg-dark-surface">
+        <div className="overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
           {/* Card heading */}
-          <div className="border-b border-dark-border px-6 py-4">
-            <h2 className="text-base font-semibold text-white">Murojaatlar jadvali</h2>
+          <div className="border-b border-Color-Grey-Grey-200 px-6 py-4">
+            <h2 className="text-base font-semibold text-Color-Grey-Grey-950">Murojaatlar jadvali</h2>
           </div>
 
           {/* Filter toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dark-border px-6 py-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="text"
-                  value={rawSearch}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Ism yoki telefon..."
-                  className="w-64 rounded-xl border border-gray-700 bg-gray-900/60 py-2.5 pl-9 pr-4 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500"
-                />
-              </div>
-              <button className="flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-900/60 px-4 py-2.5 text-sm text-white transition-colors hover:border-gray-600">
-                Holati
-                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+          <div className="flex flex-wrap items-center gap-3 border-b border-Color-Grey-Grey-200 px-6 py-4">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-Color-Grey-Grey-500" />
+              <input
+                type="text"
+                value={rawSearch}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder="Ism yoki telefon..."
+                className="w-64 rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 py-2.5 pl-9 pr-4 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400"
+              />
             </div>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90">
-              <SlidersHorizontal className="h-4 w-4" />
-              Filtrlash
-            </button>
+            <FilterDropdown
+              placeholder="Holati"
+              options={[
+                { value: 'new',     label: 'Yangi'      },
+                { value: 'solved',  label: 'Bajarildi'  },
+                { value: 'ignored', label: 'Rad etildi' },
+              ]}
+              value={statusFilter}
+              onChange={(v) => { setStatusFilter(v); setPage(1); }}
+            />
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto">
             <div className="min-w-[820px] px-6 py-4">
               {/* Header */}
-              <div className="flex items-center gap-6 rounded-xl bg-gray-800/40 px-4 py-3">
+              <div className="flex items-center gap-6 rounded-xl bg-Color-Grey-Grey-50 px-4 py-3">
                 {HEADERS.map(([label, cls]) => (
-                  <div key={label} className={`${cls} text-xs font-semibold uppercase tracking-wider text-gray-400`}>
+                  <div key={label} className={`${cls} text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>
                     {label}
                   </div>
                 ))}
               </div>
 
               {/* Body */}
-              <div className="mt-2 overflow-hidden rounded-xl bg-gray-900/20">
+              <div className="mt-2 overflow-hidden rounded-xl bg-Color-Light-Light">
                 {loading ? (
                   <SkeletonRows />
                 ) : error ? (
                   <div className="flex flex-col items-center gap-3 py-16 text-center">
-                    <AlertCircle className="h-10 w-10 text-red-500/60" strokeWidth={1.5} />
-                    <p className="text-sm font-medium text-red-400">{error}</p>
+                    <AlertCircle className="h-10 w-10 text-red-400" strokeWidth={1.5} />
+                    <p className="text-sm font-medium text-Color-Danger-Danger-Accent">{error}</p>
                   </div>
                 ) : appeals.length === 0 ? (
-                  <div className="py-16 text-center text-sm text-gray-600">
+                  <div className="py-16 text-center text-sm text-Color-Grey-Grey-500">
                     Murojaatlar topilmadi
                   </div>
                 ) : (

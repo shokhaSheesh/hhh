@@ -27,9 +27,9 @@ function fmtLanguage(langs: string[]) {
 
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-dark-border/70 py-3 last:border-0">
-      <span className="shrink-0 text-sm text-gray-400">{label}</span>
-      <span className={['text-right text-sm font-medium text-white', mono ? 'font-mono' : ''].join(' ')}>
+    <div className="flex items-start justify-between gap-3 border-b border-Color-Grey-Grey-200 py-3 last:border-0">
+      <span className="shrink-0 text-sm text-Color-Grey-Grey-600">{label}</span>
+      <span className={['text-right text-sm font-medium text-Color-Grey-Grey-950', mono ? 'font-mono' : ''].join(' ')}>
         {value || '—'}
       </span>
     </div>
@@ -86,13 +86,13 @@ export function UserProfile({ user, onDeleted }: Props) {
               }}
             />
             <div
-              className="hidden h-20 w-20 items-center justify-center rounded-xl bg-gray-700 text-2xl font-bold text-gray-300"
+              className="hidden h-20 w-20 items-center justify-center rounded-xl bg-Color-Grey-Grey-200 text-2xl font-bold text-Color-Grey-Grey-700"
               aria-hidden
             >
               {initials}
             </div>
           </div>
-          <p className="text-center text-base font-semibold capitalize text-white">
+          <p className="text-center text-base font-semibold capitalize text-Color-Grey-Grey-950">
             {user.name.toLowerCase()}
           </p>
         </div>
@@ -110,7 +110,7 @@ export function UserProfile({ user, onDeleted }: Props) {
         {/* Delete button */}
         <button
           onClick={() => { setDeleteError(null); setModalOpen(true); }}
-          className="mt-6 flex items-center gap-2 text-sm font-medium text-red-400 transition-colors hover:text-red-300"
+          className="mt-6 flex items-center gap-2 text-sm font-medium text-Color-Danger-Danger-Accent transition-opacity hover:opacity-70"
         >
           <Trash2 className="h-4 w-4" />
           Foydalanuvchini o'chirish

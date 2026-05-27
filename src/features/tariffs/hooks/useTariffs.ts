@@ -122,6 +122,10 @@ export async function updateTariff(payload: UpdateTariffPayload): Promise<void> 
   });
 }
 
+export async function deleteTariff(guid: string): Promise<void> {
+  await rootApi.delete(`/v2/items/tariffs/${guid}?from-ofs=true`);
+}
+
 export async function createTariff(payload: CreateTariffPayload): Promise<void> {
   await rootApi.post('/v2/items/tariffs?from-ofs=true', {
     data: {

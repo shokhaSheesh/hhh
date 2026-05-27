@@ -13,12 +13,14 @@ export const VIEW = {
   portBindings: `${BASE}/v3/menus/bbdcb468-87a5-4164-acfe-a2f8f4ca92b8/views/baf79c4b-db5f-421f-8e4a-469be3286e97/tables`,
   tariffs:       `${BASE}/v3/menus/7e938887-d473-4730-814c-ef6a43e55662/views/075bcf42-efd2-4b59-ab12-473e0ddc47f4/tables`,
   promocodes:    `${BASE}/v3/menus/c23f772e-8946-429f-871a-a787216ffc35/views/cbba53e0-4ffa-42a9-b6e2-b8c4e8402e04/tables`,
-  notifications:  `${BASE}/v3/menus/a8919382-fafb-49d4-9534-4eb61a0474a2/views/a554c84a-fa13-4058-9db6-3c31fbe8b513/tables`,
+  notifications:  `${BASE}/v3/menus/a8919382-fafb-49d4-9534-4eb61a0474a2/views/905a9855-b3dc-4699-b51d-5c10b19ab836/tables`,
   transactions:   `${BASE}/v3/menus/0eebdfa0-bdab-4b3d-ac20-488a0d65a96e/views/95ca99bf-f559-4056-b1ae-dc202a6546fa/tables`,
   cards:          `${BASE}/v3/menus/3abcfab4-6ac3-4848-9fa5-dad6f5bd08ca/views/875690ca-e354-45fd-95ba-d3329262f5fc/tables`,
   batteries:       `${BASE}/v3/menus/96d306f2-c7bf-4f25-86fe-309d1b54fdde/views/00fd8bee-be8d-49f1-be87-d41edb4cabb7/tables`,
   admins:          `${BASE}/v3/menus/d90e55a6-6719-4733-bca1-616d5047c5d0/views/8c4a0ef0-152a-4edf-93eb-9895e5649cc0/tables`,
   userOperations:  `${BASE}/v3/menus/e215f4bd-a8a0-43bd-9c54-eec3ba0a8ef0/views/2746c785-91eb-4afd-8624-ad80215e7e38/tables`,
+  subscriptions:   `${BASE}/v3/menus/985eb491-f3c0-4eeb-b993-be30df5d5614/views/762180b2-555a-4411-8176-3c9a101b8827/tables`,
+  penalties:       `${BASE}/v3/menus/9821e527-030e-4c1e-91a6-c57f08ec31ec/views/02d63642-93bb-4ab8-83d2-0c85b281cf0c/tables`,
 } as const;
 
 // ─── Error class ──────────────────────────────────────────────────────────────
@@ -121,36 +123,45 @@ async function request<T>(
     ...options,
     headers: {
       ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-      ...(token  ? { Authorization:    token  } : {}),
-      ...(ENV_ID ? { 'environment-id': ENV_ID } : {}),
+      ...(token      ? { Authorization:    token      } : {}),
+      ...(ENV_ID     ? { 'environment-id': ENV_ID     } : {}),
+      ...(RESOURCE_ID ? { 'resource-id':   RESOURCE_ID } : {}),
       ...options.headers,
     },
   });
 
-  if (res.status === 401 && _retry && refresh_token) {
-    try {
-      await refreshOnce();
-      return request<T>(absoluteUrl, options, false);
-    } catch {
-      window.dispatchEvent(new Event('auth:session-expired'));
-      throw new ApiError(401, 'Unauthorized', 'Sessiya muddati tugadi');
-    }
-  }
-
-  if (res.status === 401) {
-    window.dispatchEvent(new Event('auth:session-expired'));
-  }
-
   if (!res.ok) {
     let detail = '';
+    let isAuthError = res.status === 401;
+
     try {
       const errJson = await res.json() as Record<string, unknown>;
+      const dataField = errJson['data'] as string | undefined;
       detail = errJson['description'] as string
         ?? errJson['message'] as string
         ?? JSON.stringify(errJson);
+      // ucode returns 400 with "error invalid authorization method" for expired tokens
+      if (res.status === 400 && typeof dataField === 'string' && dataField.toLowerCase().includes('authorization')) {
+        isAuthError = true;
+      }
     } catch {
       detail = await res.text().catch(() => '');
     }
+
+    if (isAuthError && _retry && refresh_token) {
+      try {
+        await refreshOnce();
+        return request<T>(absoluteUrl, options, false);
+      } catch {
+        window.dispatchEvent(new Event('auth:session-expired'));
+        throw new ApiError(401, 'Unauthorized', 'Sessiya muddati tugadi');
+      }
+    }
+
+    if (isAuthError) {
+      window.dispatchEvent(new Event('auth:session-expired'));
+    }
+
     throw new ApiError(res.status, res.statusText, detail || undefined);
   }
 
@@ -188,3 +199,36 @@ export const rootApi = {
       headers: opts?.headers as HeadersInit | undefined,
     }),
 };
+
+export async function uploadFile(path: string, formData: FormData): Promise<unknown> {
+  const { access_token } = getTokens();
+  const token = access_token
+    ? (access_token.startsWith('Bearer ') ? access_token : `Bearer ${access_token}`)
+    : undefined;
+
+  const url = new URL(`${BASE}${path}`);
+  url.searchParams.set('project-id', PROJECT_ID);
+
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: {
+      ...(token       ? { Authorization:    token       } : {}),
+      ...(ENV_ID      ? { 'environment-id': ENV_ID      } : {}),
+      ...(RESOURCE_ID ? { 'resource-id':    RESOURCE_ID } : {}),
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let detail = '';
+    try {
+      const errJson = await res.json() as Record<string, unknown>;
+      detail = (errJson['description'] ?? errJson['message'] ?? JSON.stringify(errJson)) as string;
+    } catch {
+      detail = await res.text().catch(() => '');
+    }
+    throw new ApiError(res.status, res.statusText, detail || undefined);
+  }
+
+  return res.json();
+}

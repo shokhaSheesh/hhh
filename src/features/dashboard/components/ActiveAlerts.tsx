@@ -1,6 +1,6 @@
 const SEVERITY_MAP = {
-  critical: { label: 'Kritik ahvolda', cls: 'bg-red-500/15 text-red-400 border-red-500/25'     },
-  warning:  { label: 'Ogohlantirish',  cls: 'bg-amber-500/15 text-amber-400 border-amber-500/25' },
+  critical: { label: 'Kritik ahvolda', cls: 'bg-Color-Danger-Danger-Soft text-Color-Danger-Danger-Accent border-Color-Danger-Danger-Accent'   },
+  warning:  { label: 'Ogohlantirish',  cls: 'bg-Color-Warning-Warning-Soft text-Color-Warning-Warning border-Color-Warning-Warning' },
 } as const;
 
 type Severity = keyof typeof SEVERITY_MAP;
@@ -21,13 +21,13 @@ const ALERTS: Alert[] = [
 
 export default function ActiveAlerts() {
   return (
-    <div className="flex flex-col rounded-2xl border border-dark-border bg-dark-surface">
+    <div className="flex flex-col rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4">
-        <span className="text-base font-semibold text-white">
+        <span className="text-base font-semibold text-Color-Grey-Grey-950">
           Aktiv ogohlantirishlar
         </span>
-        <button className="text-sm text-gray-500 transition-colors hover:text-white">
+        <button className="text-sm text-Color-Grey-Grey-500 transition-colors hover:text-Color-Grey-Grey-950">
           Barchasini ko'rish
         </button>
       </div>
@@ -41,14 +41,14 @@ export default function ActiveAlerts() {
               key={alert.id}
               className={[
                 'flex items-start justify-between gap-3 px-5 py-3',
-                i < ALERTS.length - 1 ? 'border-b border-dark-border' : '',
+                i < ALERTS.length - 1 ? 'border-b border-Color-Grey-Grey-200' : '',
               ].join(' ')}
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white">
+                <p className="truncate text-sm font-medium text-Color-Grey-Grey-950">
                   {alert.station} — {alert.issue}
                 </p>
-                <p className="mt-0.5 truncate text-xs text-gray-500">
+                <p className="mt-0.5 truncate text-xs text-Color-Grey-Grey-600">
                   {alert.location}
                 </p>
               </div>

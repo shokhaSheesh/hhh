@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ShieldCheck, Eye, EyeOff, ChevronDown, Check } from 'lucide-react';
 import { createAdmin, updateAdmin, type AdminPayload } from './hooks/useAdmins';
-import { useRoles } from '@/features/settings/hooks/useRoles';
-import { useClientTypes } from '@/features/settings/hooks/useClientTypes';
+import { useRoles } from './hooks/useRoles';
+import { useClientTypes } from './hooks/useClientTypes';
 import type { Admin } from '@/types/admins';
 
 // ─── Custom Dropdown ──────────────────────────────────────────────────────────
@@ -55,25 +55,25 @@ function Dropdown({
         onClick={handleToggle}
         className={`flex w-full items-center justify-between rounded-xl border px-4 py-2.5 text-sm outline-none transition-colors ${
           open
-            ? 'border-gray-500 bg-gray-900/80'
-            : 'border-gray-700 bg-gray-900/60 hover:border-gray-600'
+            ? 'border-Color-Grey-Grey-400 bg-Color-Grey-Grey-50'
+            : 'border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 hover:border-Color-Grey-Grey-400'
         } ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
       >
-        <span className={selected ? 'text-white' : 'text-gray-600'}>
+        <span className={selected ? 'text-Color-Grey-Grey-950' : 'text-Color-Grey-Grey-500'}>
           {selected ? selected.label : placeholder}
         </span>
-        <ChevronDown className={`h-4 w-4 shrink-0 text-gray-500 transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`h-4 w-4 shrink-0 text-Color-Grey-Grey-500 transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && rect && createPortal(
         <div
           ref={listRef}
           style={{ position: 'fixed', top: rect.top, left: rect.left, width: rect.width, zIndex: 9999 }}
-          className="overflow-hidden rounded-xl border border-dark-border bg-[#1c1c26] shadow-2xl"
+          className="overflow-hidden rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl"
         >
           <div className="max-h-48 overflow-y-auto py-1">
             {options.length === 0 ? (
-              <p className="px-4 py-3 text-xs text-gray-600">Mavjud emas</p>
+              <p className="px-4 py-3 text-xs text-Color-Grey-Grey-500">Mavjud emas</p>
             ) : (
               options.map((opt) => {
                 const active = opt.value === value;
@@ -84,8 +84,8 @@ function Dropdown({
                     onClick={() => { onChange(opt.value); setOpen(false); }}
                     className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
                       active
-                        ? 'bg-brand-lime/10 text-brand-lime'
-                        : 'text-gray-300 hover:bg-white/[0.04] hover:text-white'
+                        ? 'bg-Color-Primary-Primary/10 text-Color-Primary-Primary'
+                        : 'text-Color-Grey-Grey-700 hover:bg-Color-Grey-Grey-50 hover:text-Color-Grey-Grey-950'
                     }`}
                   >
                     {opt.label}
@@ -173,8 +173,8 @@ export default function AdminModal({ initial, onClose, onSuccess }: Props) {
     }
   }
 
-  const inputCls = 'w-full rounded-xl border border-gray-700 bg-gray-900/60 px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500';
-  const labelCls = 'mb-1.5 block text-sm font-medium text-gray-400';
+  const inputCls = 'w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400';
+  const labelCls = 'mb-1.5 block text-sm font-medium text-Color-Grey-Grey-600';
 
   const clientTypeOptions: DropdownOption[] = clientTypes.map((ct) => ({ value: ct.guid, label: ct.name }));
   const roleOptions: DropdownOption[]       = filteredRoles.map((r)  => ({ value: r.guid,  label: r.name  }));
@@ -186,21 +186,21 @@ export default function AdminModal({ initial, onClose, onSuccess }: Props) {
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-dark-border bg-[#16161D] shadow-2xl">
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-dark-border px-6 py-4">
+        <div className="flex items-center justify-between border-b border-Color-Grey-Grey-200 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-lime/10">
-              <ShieldCheck className="h-4 w-4 text-brand-lime" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-Color-Primary-Primary/10">
+              <ShieldCheck className="h-4 w-4 text-Color-Primary-Primary" />
             </div>
-            <h2 className="text-base font-semibold text-white">
+            <h2 className="text-base font-semibold text-Color-Grey-Grey-950">
               {isEdit ? 'Administratorni tahrirlash' : "Administrator qo'shish"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-white/10 hover:text-white"
+            className="rounded-lg p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950"
           >
             <X className="h-5 w-5" />
           </button>
@@ -209,7 +209,7 @@ export default function AdminModal({ initial, onClose, onSuccess }: Props) {
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <p className="rounded-xl bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{error}</p>
+            <p className="rounded-xl border border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</p>
           )}
 
           <div>
@@ -228,7 +228,7 @@ export default function AdminModal({ initial, onClose, onSuccess }: Props) {
             <label className={labelCls}>
               Parol{' '}
               {isEdit
-                ? <span className="text-gray-600 font-normal">(ixtiyoriy — o'zgartirish uchun)</span>
+                ? <span className="text-Color-Grey-Grey-500 font-normal">(ixtiyoriy — o'zgartirish uchun)</span>
                 : <span className="text-red-500">*</span>}
             </label>
             <div className="relative">
@@ -244,7 +244,7 @@ export default function AdminModal({ initial, onClose, onSuccess }: Props) {
                 type="button"
                 onClick={() => setShowPass((v) => !v)}
                 tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-Color-Grey-Grey-500 hover:text-Color-Grey-Grey-700"
               >
                 {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -290,14 +290,14 @@ export default function AdminModal({ initial, onClose, onSuccess }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5"
+              className="rounded-xl border border-Color-Grey-Grey-200 px-4 py-2 text-sm font-semibold text-Color-Grey-Grey-700 transition-colors hover:bg-Color-Grey-Grey-50"
             >
               Bekor qilish
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-xl bg-brand-lime px-5 py-2 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="rounded-xl bg-Color-Info-Info-Accent px-5 py-2 text-sm font-bold text-Color-Light-Constant-White transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {saving ? 'Saqlanmoqda…' : isEdit ? 'Saqlash' : "Qo'shish"}
             </button>

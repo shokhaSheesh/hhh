@@ -31,8 +31,9 @@ function loadTariffNames(): Promise<Record<string, string>> {
 }
 
 interface UseUserOperationsParams {
-  page:   number;
-  search: string;
+  page:      number;
+  userId?:   string;
+  opType?:   string | null;
 }
 
 interface UseUserOperationsResult {
@@ -43,7 +44,7 @@ interface UseUserOperationsResult {
   error:       string | null;
 }
 
-export function useUserOperations({ page, search }: UseUserOperationsParams): UseUserOperationsResult {
+export function useUserOperations({ page, userId, opType }: UseUserOperationsParams): UseUserOperationsResult {
   const [operations,  setOperations]  = useState<UserOperation[]>([]);
   const [tariffNames, setTariffNames] = useState<Record<string, string>>({});
   const [total,       setTotal]       = useState(0);
@@ -55,18 +56,18 @@ export function useUserOperations({ page, search }: UseUserOperationsParams): Us
     setLoading(true);
     setError(null);
 
+    const body: Record<string, unknown> = {
+      row_view_id: VIEW_ID,
+      offset:      (page - 1) * LIMIT,
+      limit:       LIMIT,
+      order:       {},
+      view_fields: [],
+    };
+    if (userId) body['users_id'] = userId;
+    if (opType) body['type'] = [opType];
+
     Promise.all([
-      api.post<UserOperationsListResponse>('/user_operations/items/list', {
-        data: {
-          row_view_id: VIEW_ID,
-          offset:      (page - 1) * LIMIT,
-          limit:       LIMIT,
-          search:      search || '',
-          order:       {},
-          view_fields: [],
-          undefined:   '',
-        },
-      }),
+      api.post<UserOperationsListResponse>('/user_operations/items/list', { data: body }),
       loadTariffNames(),
     ])
       .then(([res, names]) => {
@@ -83,7 +84,7 @@ export function useUserOperations({ page, search }: UseUserOperationsParams): Us
       });
 
     return () => { cancelled = true; };
-  }, [page, search]);
+  }, [page, userId, opType]);
 
   return { operations, tariffNames, total, loading, error };
 }

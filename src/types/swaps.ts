@@ -81,6 +81,8 @@ export interface SwapRecord {
   status:                  SwapStatus[];
   bound_at:                string | null;
   unbound_at:              string;
+  unbound_battery_soc:     number | null;
+  bound_battery_soc:       number | null;
   created_at:              string;
   updated_at:              string;
 }

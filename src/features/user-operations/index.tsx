@@ -1,20 +1,71 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
-  ArrowRightLeft, Search, ChevronLeft, ChevronRight, AlertCircle, Check, X, Minus,
+  ArrowRightLeft, ChevronLeft, ChevronRight, AlertCircle, Check, X, Minus,
+  TrendingDown, TrendingUp,
 } from 'lucide-react';
 import { useUserOperations } from './hooks/useUserOperations';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useDebounce } from '@/hooks/useDebounce';
-import type { UserOperation } from '@/types/userOperations';
+import UserFilter, { type UserOption } from '@/components/UserFilter';
+import { FilterDropdown } from '@/components/FilterDropdown';
+import { createApi, VIEW } from '@/api/client';
+import type { UserOperation, UserOperationsListResponse } from '@/types/userOperations';
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+
+const opsApi = createApi(VIEW.userOperations);
+const VIEW_ID = '2746c785-91eb-4afd-8624-ad80215e7e38';
+
+function StatCard({ label, value, icon: Icon, iconBg }: {
+  label: string; value: number | null; icon: React.ElementType; iconBg: string;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light p-4">
+      <div>
+        <p className="text-sm text-Color-Grey-Grey-600">{label}</p>
+        <p className="mt-1 text-2xl font-semibold text-Color-Grey-Grey-950">
+          {value === null ? (
+            <span className="inline-block h-7 w-16 animate-pulse rounded-lg bg-Color-Grey-Grey-200" />
+          ) : (
+            <>{value.toLocaleString('ru-RU')} ta</>
+          )}
+        </p>
+      </div>
+      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
+        <Icon className="h-5 w-5 text-white" />
+      </div>
+    </div>
+  );
+}
+
+function useOpCounts() {
+  const [withdrawCount, setWithdrawCount] = useState<number | null>(null);
+  const [depositCount,  setDepositCount]  = useState<number | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const base = { row_view_id: VIEW_ID, offset: 0, limit: 1, order: {}, view_fields: [] };
+    Promise.all([
+      opsApi.post<UserOperationsListResponse>('/user_operations/items/list', { data: { ...base, type: ['withdraw'] } }),
+      opsApi.post<UserOperationsListResponse>('/user_operations/items/list', { data: { ...base, type: ['deposit']  } }),
+    ]).then(([a, b]) => {
+      if (cancelled) return;
+      setWithdrawCount(a.data.data.count ?? 0);
+      setDepositCount(b.data.data.count ?? 0);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  return { withdrawCount, depositCount };
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string) {
   try {
+    const utc = /Z|[+-]\d\d:\d\d$/.test(iso) ? iso : iso + 'Z';
     return new Intl.DateTimeFormat('ru-RU', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
-    }).format(new Date(iso));
+      timeZone: 'Asia/Tashkent',
+    }).format(new Date(utc));
   } catch { return iso; }
 }
 
@@ -30,8 +81,8 @@ function initials(name: string) {
 // ─── Nullable name cell ───────────────────────────────────────────────────────
 
 function NameCell({ value }: { value: string | null | undefined }) {
-  if (!value) return <Minus className="h-3.5 w-3.5 text-gray-600" />;
-  return <span className="text-sm text-gray-300">{value}</span>;
+  if (!value) return <Minus className="h-3.5 w-3.5 text-Color-Grey-Grey-400" />;
+  return <span className="text-sm text-Color-Grey-Grey-700">{value}</span>;
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -57,8 +108,8 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
           key={t.id}
           className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg ${
             t.ok
-              ? 'border-green-500/30 bg-green-500/10 text-green-400'
-              : 'border-red-500/30   bg-red-500/10   text-red-400'
+              ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+              : 'border-red-300 bg-red-50 text-red-600'
           }`}
         >
           {t.ok ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
@@ -89,16 +140,16 @@ function SkeletonRows() {
   return (
     <>
       {Array.from({ length: 20 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 border-b border-dark-border px-4 py-4">
-          <div className={`${COL.num}          h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.user}         h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.type}         h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.amount}       h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.subscription} h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.penalty}      h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.coupon}       h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.promocode}    h-4 animate-pulse rounded bg-gray-800`} />
-          <div className={`${COL.date}         h-4 animate-pulse rounded bg-gray-800`} />
+        <div key={i} className="flex items-center gap-4 border-b border-Color-Grey-Grey-200 px-4 py-4">
+          <div className={`${COL.num}          h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.user}         h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.type}         h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.amount}       h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.subscription} h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.penalty}      h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.coupon}       h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.promocode}    h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
+          <div className={`${COL.date}         h-4 animate-pulse rounded bg-Color-Grey-Grey-200`} />
         </div>
       ))}
     </>
@@ -147,28 +198,28 @@ function DataRow({
   const opTypeLabel = opType ? (TYPE_LABELS[opType.toLowerCase()] ?? opType) : '—';
 
   return (
-    <div className="flex items-center gap-4 border-b border-dark-border px-4 py-3.5 transition-colors hover:bg-white/[0.03]">
-      <span className={`${COL.num} text-sm font-semibold text-gray-500`}>{rowNum}</span>
+    <div className="flex items-center gap-4 border-b border-Color-Grey-Grey-200 px-4 py-3.5 transition-colors hover:bg-Color-Grey-Grey-50">
+      <span className={`${COL.num} text-sm font-semibold text-Color-Grey-Grey-500`}>{rowNum}</span>
 
       <div className={`${COL.user} flex items-center gap-2 min-w-0`}>
         {user ? (
           <>
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-lime/20 text-[10px] font-bold text-brand-lime">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-Color-Primary-Primary/10 text-[10px] font-bold text-Color-Primary-Primary">
               {initials(user.name || '?')}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{user.name || '—'}</p>
-              <p className="truncate font-mono text-xs text-gray-500">{user.phone || '—'}</p>
+              <p className="truncate text-sm font-semibold text-Color-Grey-Grey-950">{user.name || '—'}</p>
+              <p className="truncate font-mono text-xs text-Color-Grey-Grey-600">{user.phone || '—'}</p>
             </div>
           </>
         ) : (
-          <span className="text-sm text-gray-600">—</span>
+          <span className="text-sm text-Color-Grey-Grey-500">—</span>
         )}
       </div>
 
-      <span className={`${COL.type} truncate text-sm text-gray-300`}>{opTypeLabel}</span>
+      <span className={`${COL.type} truncate text-sm text-Color-Grey-Grey-700`}>{opTypeLabel}</span>
 
-      <span className={`${COL.amount} font-mono text-sm font-semibold text-white`}>
+      <span className={`${COL.amount} font-mono text-sm font-semibold text-Color-Grey-Grey-950`}>
         {fmtAmount(op.amount)}
       </span>
 
@@ -186,11 +237,11 @@ function DataRow({
 
       <div className={`${COL.promocode} flex items-center min-w-0`}>
         {promocodeLabel
-          ? <span className="rounded-md border border-brand-lime/30 bg-brand-lime/10 px-2 py-0.5 font-mono text-xs font-semibold text-brand-lime">{promocodeLabel}</span>
-          : <Minus className="h-3.5 w-3.5 text-gray-600" />}
+          ? <span className="rounded-md border border-Color-Primary-Primary/30 bg-Color-Primary-Primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-Color-Primary-Primary">{promocodeLabel}</span>
+          : <Minus className="h-3.5 w-3.5 text-Color-Grey-Grey-400" />}
       </div>
 
-      <span className={`${COL.date} text-sm text-gray-400`}>{fmtDate(op.created_at)}</span>
+      <span className={`${COL.date} text-sm text-Color-Grey-Grey-600`}>{fmtDate(op.created_at)}</span>
     </div>
   );
 }
@@ -213,25 +264,25 @@ function Pagination({ page, total, onChange }: { page: number; total: number; on
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 border-t border-dark-border px-4 py-3">
-      <span className="text-xs text-gray-500">{total.toLocaleString('ru-RU')} ta natija</span>
+    <div className="flex items-center justify-between gap-4 border-t border-Color-Grey-Grey-200 px-4 py-3">
+      <span className="text-xs text-Color-Grey-Grey-600">{total.toLocaleString('ru-RU')} ta natija</span>
       <div className="flex items-center gap-1">
         <button onClick={() => onChange(page - 1)} disabled={page === 1}
-          className="rounded-lg p-1.5 text-gray-500 hover:bg-white/5 disabled:opacity-30">
+          className="rounded-lg p-1.5 text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-50 disabled:opacity-30">
           <ChevronLeft className="h-4 w-4" />
         </button>
         {pages.map((p, i) => (
           p === '…'
-            ? <span key={`e${i}`} className="px-1 text-xs text-gray-600">…</span>
+            ? <span key={`e${i}`} className="px-1 text-xs text-Color-Grey-Grey-500">…</span>
             : <button key={p} onClick={() => onChange(p as number)}
                 className={`min-w-[28px] rounded-lg px-2 py-1 text-xs font-semibold transition-colors ${
-                  p === page ? 'bg-brand-lime text-black' : 'text-gray-400 hover:bg-white/5'
+                  p === page ? 'bg-Color-Primary-Primary text-Color-Dark-Constant-Dark' : 'text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-50'
                 }`}>
                 {p}
               </button>
         ))}
         <button onClick={() => onChange(page + 1)} disabled={page === totalPages}
-          className="rounded-lg p-1.5 text-gray-500 hover:bg-white/5 disabled:opacity-30">
+          className="rounded-lg p-1.5 text-Color-Grey-Grey-600 hover:bg-Color-Grey-Grey-50 disabled:opacity-30">
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
@@ -245,17 +296,20 @@ export default function UserOperationsPage() {
   const { canRead } = usePermissions();
   const { toasts }  = useToasts();
 
-  const [page,      setPage]      = useState(1);
-  const [rawSearch, setRawSearch] = useState('');
-  const search = useDebounce(rawSearch, 400);
+  const [page,     setPage]     = useState(1);
+  const [userId,   setUserId]   = useState<string | undefined>(undefined);
+  const [opType,   setOpType]   = useState<string | null>(null);
 
-  const { operations, tariffNames, total, loading, error } = useUserOperations({ page, search });
+  const handleUserSelect = (u: UserOption | null) => { setUserId(u?.guid); setPage(1); };
+
+  const { operations, tariffNames, total, loading, error } = useUserOperations({ page, userId, opType });
+  const { withdrawCount, depositCount } = useOpCounts();
 
   if (!canRead('user_operations')) {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3 text-center">
-        <AlertCircle className="h-8 w-8 text-gray-600" />
-        <p className="text-sm font-medium text-gray-400">
+        <AlertCircle className="h-8 w-8 text-Color-Grey-Grey-400" />
+        <p className="text-sm font-medium text-Color-Grey-Grey-600">
           Sizda ushbu sahifani ko&apos;rish huquqi yo&apos;q
         </p>
       </div>
@@ -270,77 +324,87 @@ export default function UserOperationsPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-lime/10">
-              <ArrowRightLeft className="h-5 w-5 text-brand-lime" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-Color-Primary-Primary/10">
+              <ArrowRightLeft className="h-5 w-5 text-Color-Primary-Primary" />
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-semibold tracking-tight text-white">Foydalanuvchi operatsiyalari</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-Color-Grey-Grey-950">Foydalanuvchi operatsiyalari</h1>
                 {total > 0 && (
-                  <span className="rounded-full bg-gray-800 px-2.5 py-0.5 text-xs font-semibold text-gray-400">
+                  <span className="rounded-full bg-Color-Grey-Grey-100 px-2.5 py-0.5 text-xs font-semibold text-Color-Grey-Grey-600">
                     {total.toLocaleString('ru-RU')}
                   </span>
                 )}
               </div>
-              <p className="mt-0.5 text-sm text-gray-400">Barcha foydalanuvchi moliyaviy operatsiyalari</p>
+              <p className="mt-0.5 text-sm text-Color-Grey-Grey-600">Barcha foydalanuvchi moliyaviy operatsiyalari</p>
             </div>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Qidirish..."
-              value={rawSearch}
-              onChange={(e) => { setRawSearch(e.target.value); setPage(1); }}
-              className="w-full rounded-xl border border-gray-700 bg-gray-900/60 py-2.5 pl-9 pr-4 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500"
-            />
-          </div>
+        {/* Stat cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <StatCard label="Jami"           value={total}         icon={ArrowRightLeft} iconBg="bg-blue-600"    />
+          <StatCard label="Yechib olish"   value={withdrawCount} icon={TrendingDown}   iconBg="bg-orange-500"  />
+          <StatCard label="Hisobni to'ldirish" value={depositCount} icon={TrendingUp}  iconBg="bg-emerald-600" />
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-2xl border border-dark-border bg-dark-surface">
-          {/* Header */}
-          <div className="flex items-center gap-4 border-b border-dark-border px-4 py-3">
-            <span className={`${COL.num}          text-xs font-semibold uppercase tracking-wider text-gray-500`}>#</span>
-            <span className={`${COL.user}         text-xs font-semibold uppercase tracking-wider text-gray-500`}>Foydalanuvchi</span>
-            <span className={`${COL.type}         text-xs font-semibold uppercase tracking-wider text-gray-500`}>Tur</span>
-            <span className={`${COL.amount}       text-xs font-semibold uppercase tracking-wider text-gray-500`}>Summa</span>
-            <span className={`${COL.subscription} text-xs font-semibold uppercase tracking-wider text-gray-500`}>Obuna tarifi</span>
-            <span className={`${COL.penalty}      text-xs font-semibold uppercase tracking-wider text-gray-500`}>Jarima</span>
-            <span className={`${COL.coupon}       text-xs font-semibold uppercase tracking-wider text-gray-500`}>Kupon</span>
-            <span className={`${COL.promocode}    text-xs font-semibold uppercase tracking-wider text-gray-500`}>Promokod</span>
-            <span className={`${COL.date}         text-xs font-semibold uppercase tracking-wider text-gray-500`}>Sana</span>
+        <div className="overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light">
+          {/* Filter toolbar */}
+          <div className="flex items-center gap-3 border-b border-Color-Grey-Grey-200 px-4 py-4">
+            <UserFilter onSelect={handleUserSelect} />
+            <FilterDropdown
+              placeholder="Tur"
+              options={[
+                { value: 'withdraw', label: "Yechib olish"     },
+                { value: 'deposit',  label: "Hisobni to'ldirish" },
+              ]}
+              value={opType}
+              onChange={(v) => { setOpType(v); setPage(1); }}
+            />
           </div>
 
-          {/* Body */}
-          {error ? (
-            <div className="flex items-center gap-3 px-4 py-8 text-red-400">
-              <AlertCircle className="h-5 w-5 shrink-0" />
-              <span className="text-sm">{error}</span>
+          {/* Scrollable table area */}
+          <div className="overflow-x-auto">
+            {/* Header */}
+            <div className="flex min-w-max items-center gap-4 border-b border-Color-Grey-Grey-200 px-4 py-3">
+              <span className={`${COL.num}          text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>#</span>
+              <span className={`${COL.user}         text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Foydalanuvchi</span>
+              <span className={`${COL.type}         text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Tur</span>
+              <span className={`${COL.amount}       text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Summa</span>
+              <span className={`${COL.subscription} text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Obuna tarifi</span>
+              <span className={`${COL.penalty}      text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Jarima</span>
+              <span className={`${COL.coupon}       text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Kupon</span>
+              <span className={`${COL.promocode}    text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Promokod</span>
+              <span className={`${COL.date}         text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600`}>Sana</span>
             </div>
-          ) : loading ? (
-            <SkeletonRows />
-          ) : operations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-16 text-gray-600">
-              <ArrowRightLeft className="h-8 w-8" />
-              <p className="text-sm">Operatsiyalar topilmadi</p>
-            </div>
-          ) : (
-            operations.map((op, i) => (
-              <DataRow
-                key={op.guid}
-                op={op}
-                rowNum={(page - 1) * PAGE_SIZE + i + 1}
-                tariffNames={tariffNames}
-              />
-            ))
-          )}
 
-          {/* Pagination */}
+            {/* Body */}
+            {error ? (
+              <div className="flex items-center gap-3 px-4 py-8 text-Color-Danger-Danger-Accent">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                <span className="text-sm">{error}</span>
+              </div>
+            ) : loading ? (
+              <SkeletonRows />
+            ) : operations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-16 text-Color-Grey-Grey-500">
+                <ArrowRightLeft className="h-8 w-8" />
+                <p className="text-sm">Operatsiyalar topilmadi</p>
+              </div>
+            ) : (
+              operations.map((op, i) => (
+                <DataRow
+                  key={op.guid}
+                  op={op}
+                  rowNum={(page - 1) * PAGE_SIZE + i + 1}
+                  tariffNames={tariffNames}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Pagination — outside scroll area so it stays fixed to the card */}
           {!loading && !error && total > 0 && (
             <Pagination page={page} total={total} onChange={(p) => { setPage(p); window.scrollTo(0, 0); }} />
           )}

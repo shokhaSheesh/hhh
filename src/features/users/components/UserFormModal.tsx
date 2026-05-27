@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
 import type { User } from '@/types/user';
 import { createUser, updateUser } from '../hooks/useUserMutations';
+import DatePicker from '@/components/DatePicker';
 
 // ─── Toggle ───────────────────────────────────────────────────────────────────
 
@@ -11,7 +12,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
       type="button"
       onClick={onChange}
       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors ${
-        on ? 'border-brand-lime bg-brand-lime' : 'border-gray-600 bg-gray-700'
+        on ? 'border-Color-Primary-Primary bg-Color-Primary-Primary' : 'border-Color-Grey-Grey-200 bg-Color-Grey-Grey-200'
       }`}
     >
       <span
@@ -26,7 +27,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
 // ─── Field helpers ────────────────────────────────────────────────────────────
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <label className="mb-1.5 block text-xs font-medium text-gray-400">{children}</label>;
+  return <label className="mb-1.5 block text-xs font-medium text-Color-Grey-Grey-600">{children}</label>;
 }
 
 function Input({
@@ -40,7 +41,7 @@ function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full rounded-xl border border-gray-700 bg-gray-900/60 px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20"
+      className="w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400"
     />
   );
 }
@@ -56,10 +57,10 @@ function Select({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-xl border border-gray-700 bg-gray-900/60 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20"
+      className="w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 outline-none transition-colors focus:border-Color-Grey-Grey-400"
     >
       {options.map((o) => (
-        <option key={o.value} value={o.value} className="bg-gray-900">
+        <option key={o.value} value={o.value} className="bg-Color-Light-Light">
           {o.label}
         </option>
       ))}
@@ -97,7 +98,7 @@ function initForm(user: User | null): FormState {
   if (!user) return {
     name: '', phone: '', balance: '0', address: '',
     passport_serial_number: '', pinfl: '',
-    birth_date: '', gender: 'male', app_language: 'uz',
+    birth_date: '', gender: 'M', app_language: 'uz',
     active: true, verified: true,
     client_type_id: DEFAULT_CLIENT_TYPE_ID,
     role_id:        DEFAULT_ROLE_ID,
@@ -110,7 +111,7 @@ function initForm(user: User | null): FormState {
     passport_serial_number: user.passport_serial_number ?? '',
     pinfl:                  user.pinfl ?? '',
     birth_date:             toDateInput(user.birth_date),
-    gender:                 user.gender?.[0] ?? 'male',
+    gender:                 user.gender?.[0] ?? 'M',
     app_language:           user.app_language?.[0] ?? 'uz',
     active:                 user.active ?? false,
     verified:               user.verified ?? false,
@@ -166,7 +167,7 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
       verified:               form.verified,
       synced:                 false,
       birth_date:             birthIso,
-      gender:                 [form.gender.toLowerCase()],
+      gender:                 [form.gender],
       app_language:           [form.app_language.toLowerCase()],
       address:                form.address || '',
       passport_serial_number: form.passport_serial_number || '',
@@ -183,7 +184,6 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
             guid:         user.guid,
             user_id_auth: user.user_id_auth || '5a732ce0-2aed-4e8f-b6d6-4082413ddea0',
           },
-          disable_faas: false,
         });
       } else {
         await createUser({
@@ -207,21 +207,21 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} aria-hidden />
 
-      <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-dark-border bg-dark-surface shadow-2xl" style={{ maxHeight: '90vh' }}>
+      <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl" style={{ maxHeight: '90vh' }}>
 
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-dark-border px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-Color-Grey-Grey-200 px-6 py-4">
           <div>
-            <h2 className="text-base font-semibold text-white">
+            <h2 className="text-base font-semibold text-Color-Grey-Grey-950">
               {isEdit ? "Foydalanuvchini tahrirlash" : "Yangi foydalanuvchi qo'shish"}
             </h2>
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="mt-0.5 text-xs text-Color-Grey-Grey-600">
               {isEdit ? `ID: ${user?.unique_id}` : "Barcha maydonlarni to'ldiring"}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg border border-gray-700 bg-gray-800 p-1.5 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+            className="rounded-lg border border-Color-Grey-Grey-200 bg-Color-Light-Light p-1.5 text-Color-Grey-Grey-600 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950"
           >
             <X className="h-4 w-4" />
           </button>
@@ -253,7 +253,11 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
               {/* Birth date */}
               <div>
                 <Label>Tug'ilgan sana</Label>
-                <Input value={form.birth_date} onChange={(v) => set('birth_date', v)} type="date" />
+                <DatePicker
+                  value={form.birth_date}
+                  onChange={(v) => set('birth_date', v)}
+                  placeholder="Sanani tanlang"
+                />
               </div>
 
               {/* Gender */}
@@ -263,8 +267,8 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
                   value={form.gender}
                   onChange={(v) => set('gender', v)}
                   options={[
-                    { value: 'male',   label: 'Erkak' },
-                    { value: 'female', label: 'Ayol'  },
+                    { value: 'M', label: 'Erkak' },
+                    { value: 'F', label: 'Ayol'  },
                   ]}
                 />
               </div>
@@ -302,19 +306,19 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
               </div>
 
               {/* Toggles row */}
-              <div className="col-span-2 mt-1 flex items-center gap-8 rounded-xl border border-dark-border bg-gray-900/40 px-5 py-4">
+              <div className="col-span-2 mt-1 flex items-center gap-8 rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-5 py-4">
                 <div className="flex items-center gap-3">
                   <Toggle on={form.active} onChange={() => set('active', !form.active)} />
                   <div>
-                    <p className="text-sm font-medium text-white">Faol</p>
-                    <p className="text-xs text-gray-500">Hisob faolligi</p>
+                    <p className="text-sm font-medium text-Color-Grey-Grey-950">Faol</p>
+                    <p className="text-xs text-Color-Grey-Grey-600">Hisob faolligi</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Toggle on={form.verified} onChange={() => set('verified', !form.verified)} />
                   <div>
-                    <p className="text-sm font-medium text-white">Tasdiqlangan</p>
-                    <p className="text-xs text-gray-500">Identifikatsiya holati</p>
+                    <p className="text-sm font-medium text-Color-Grey-Grey-950">Tasdiqlangan</p>
+                    <p className="text-xs text-Color-Grey-Grey-600">Identifikatsiya holati</p>
                   </div>
                 </div>
               </div>
@@ -322,7 +326,7 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
             </div>
 
             {error && (
-              <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-xs text-red-400">
+              <div className="mt-4 rounded-xl border border-red-300 bg-red-50 px-4 py-2.5 text-xs text-red-600">
                 {error}
               </div>
             )}
@@ -330,11 +334,11 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 items-center justify-between border-t border-dark-border px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-t border-Color-Grey-Grey-200 px-6 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-dark-border px-5 py-2.5 text-sm font-semibold text-gray-400 transition-colors hover:bg-white/5"
+            className="rounded-xl border border-Color-Grey-Grey-200 px-5 py-2.5 text-sm font-semibold text-Color-Grey-Grey-700 transition-colors hover:bg-Color-Grey-Grey-50"
           >
             Bekor qilish
           </button>
@@ -342,7 +346,7 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
             type="submit"
             form="user-form"
             disabled={loading || saved}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-lime px-6 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-Color-Info-Info-Accent px-6 py-2.5 text-sm font-semibold text-Color-Light-Constant-White transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {saved ? (
               <>
@@ -351,7 +355,7 @@ export function UserFormModal({ user, onClose, onSuccess }: Props) {
               </>
             ) : loading ? (
               <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 Saqlanmoqda…
               </>
             ) : isEdit ? 'Saqlash' : "Qo'shish"}

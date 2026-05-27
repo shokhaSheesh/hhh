@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Search, RefreshCw, Loader2 } from 'lucide-react';
+import DatePicker from '@/components/DatePicker';
 import { createApi, VIEW } from '@/api/client';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { User, UsersListResponse } from '@/types/user';
@@ -31,7 +32,7 @@ export const DEFAULTS: PromocodeFormValues = {
   use_count_per_user: 1,
 };
 
-const INPUT = 'w-full rounded-xl border border-dark-border bg-[#1E1E2D] px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-colors focus:border-gray-500';
+const INPUT = 'w-full rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5 text-sm text-Color-Grey-Grey-950 placeholder-Color-Grey-Grey-500 outline-none transition-colors focus:border-Color-Grey-Grey-400';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -87,9 +88,9 @@ export function fromPromocode(p: Promocode): PromocodeFormValues {
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+      <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-Color-Grey-Grey-600">
         {label}
-        {hint && <span className="normal-case font-normal text-gray-600">{hint}</span>}
+        {hint && <span className="normal-case font-normal text-Color-Grey-Grey-500">{hint}</span>}
       </label>
       {children}
     </div>
@@ -156,13 +157,13 @@ function UserSelect({
 
   if (selected ?? (value && !selected)) {
     return (
-      <div className="flex items-center justify-between rounded-xl border border-dark-border bg-[#1E1E2D] px-4 py-2.5">
+      <div className="flex items-center justify-between rounded-xl border border-Color-Grey-Grey-200 bg-Color-Grey-Grey-50 px-4 py-2.5">
         <div>
-          <p className="text-sm font-medium text-white">{selected?.name || value}</p>
-          {selected?.phone && <p className="text-xs text-gray-500">{selected.phone}</p>}
+          <p className="text-sm font-medium text-Color-Grey-Grey-950">{selected?.name || value}</p>
+          {selected?.phone && <p className="text-xs text-Color-Grey-Grey-600">{selected.phone}</p>}
         </div>
         <button type="button" onClick={clear}
-          className="text-gray-500 transition-colors hover:text-white">
+          className="text-Color-Grey-Grey-500 transition-colors hover:text-Color-Grey-Grey-950">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -171,7 +172,7 @@ function UserSelect({
 
   return (
     <div ref={wrapRef} className="relative">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-Color-Grey-Grey-500" />
       <input
         type="text"
         value={search}
@@ -181,23 +182,23 @@ function UserSelect({
         className={`${INPUT} pl-9`}
       />
       {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-border bg-[#16161D] shadow-2xl">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-Color-Grey-Grey-200 bg-Color-Light-Light shadow-2xl">
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-gray-500">
+            <div className="flex items-center justify-center gap-2 py-4 text-Color-Grey-Grey-500">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-xs">Qidirmoqda…</span>
             </div>
           ) : results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-gray-600">Mijoz topilmadi</p>
+            <p className="px-4 py-3 text-sm text-Color-Grey-Grey-500">Mijoz topilmadi</p>
           ) : (
             results.map((u) => (
               <button key={u.guid} type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(u)}
-                className="flex w-full flex-col items-start px-4 py-2.5 text-left transition-colors hover:bg-white/5"
+                className="flex w-full flex-col items-start px-4 py-2.5 text-left transition-colors hover:bg-Color-Grey-Grey-50"
               >
-                <span className="text-sm font-medium text-white">{u.name || '—'}</span>
-                <span className="text-xs text-gray-500">{u.phone}</span>
+                <span className="text-sm font-medium text-Color-Grey-Grey-950">{u.name || '—'}</span>
+                <span className="text-xs text-Color-Grey-Grey-600">{u.phone}</span>
               </button>
             ))
           )}
@@ -249,7 +250,7 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
             type="button"
             title="Tasodifiy kod yaratish"
             onClick={() => set('key', randomKey())}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-white/10 hover:text-white"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-Color-Grey-Grey-500 transition-colors hover:bg-Color-Grey-Grey-100 hover:text-Color-Grey-Grey-950"
           >
             <RefreshCw className="h-4 w-4" />
           </button>
@@ -259,14 +260,14 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
       {/* Discount type + value */}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Turi">
-          <div className="flex overflow-hidden rounded-xl border border-dark-border">
+          <div className="flex overflow-hidden rounded-xl border border-Color-Grey-Grey-200">
             {(['percentage', 'amount'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => set('discountType', t)}
                 className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
-                  form.discountType === t ? 'bg-brand-lime text-black' : 'bg-[#1E1E2D] text-gray-400 hover:text-white'
+                  form.discountType === t ? 'bg-Color-Primary-Primary text-Color-Dark-Constant-Dark' : 'bg-Color-Grey-Grey-50 text-Color-Grey-Grey-500 hover:text-Color-Grey-Grey-950'
                 }`}
               >
                 {t === 'percentage' ? 'Foizli' : 'Summa'}
@@ -287,7 +288,7 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
               required
               className={`${INPUT} pr-14`}
             />
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md bg-gray-800 px-2 py-0.5 text-[11px] font-bold text-gray-400">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md bg-Color-Grey-Grey-100 px-2 py-0.5 text-[11px] font-bold text-Color-Grey-Grey-600">
               {form.discountType === 'percentage' ? '%' : 'UZS'}
             </span>
           </div>
@@ -296,11 +297,11 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
 
       {/* Valid until */}
       <Field label="Tugash sanasi">
-        <input
-          type="datetime-local"
+        <DatePicker
           value={form.valid_until}
-          onChange={(e) => set('valid_until', e.target.value)}
-          className={`${INPUT} [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100`}
+          onChange={(v) => set('valid_until', v)}
+          placeholder="Sanani tanlang"
+          withTime
         />
       </Field>
 
@@ -333,11 +334,11 @@ export default function PromocodeForm({ initial, onSave, onCancel, saveLabel = '
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 pt-2">
         <button type="button" onClick={onCancel}
-          className="rounded-xl border border-gray-700 px-5 py-2.5 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/5">
+          className="rounded-xl border border-Color-Grey-Grey-200 px-5 py-2.5 text-sm font-semibold text-Color-Grey-Grey-700 transition-colors hover:bg-Color-Grey-Grey-50">
           Bekor qilish
         </button>
         <button type="submit" disabled={saving}
-          className="rounded-xl bg-brand-lime px-5 py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90 disabled:opacity-50">
+          className="rounded-xl bg-Color-Primary-Primary px-5 py-2.5 text-sm font-bold text-Color-Dark-Constant-Dark transition-opacity hover:opacity-90 disabled:opacity-50">
           {saveLabel}
         </button>
       </div>
