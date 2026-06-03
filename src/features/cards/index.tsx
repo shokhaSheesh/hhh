@@ -254,8 +254,6 @@ export default function CardsPage() {
 
   const { cards, total, loading, error } = useCards({ page, limit: LIMIT, userId, tick });
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
-
   function pushToast(message: string, ok: boolean) {
     const id = ++_tid;
     setToasts((p) => [...p, { id, message, ok }]);

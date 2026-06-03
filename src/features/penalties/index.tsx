@@ -218,7 +218,6 @@ export default function PenaltiesPage() {
 
   const { penalties, total, loading, error } = usePenalties({ page, limit: LIMIT, userId });
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
     <div className="space-y-5">

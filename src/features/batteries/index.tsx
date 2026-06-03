@@ -200,8 +200,6 @@ export default function BatteriesPage() {
   const { batteries, total, loading, error } = useBatteries({ page, limit: LIMIT, search, socRange, sohRange });
   const { activeCount, inactiveCount } = useBatteryCounts();
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
-
   return (
     <div className="space-y-5">
       {/* Header */}

@@ -272,7 +272,6 @@ export default function SubscriptionsPage() {
   const { subscriptions, total, loading, error } = useSubscriptions({ page, limit: LIMIT, userId });
   const { activeCount, inactiveCount } = useSubCounts();
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
     <div className="space-y-5">

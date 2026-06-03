@@ -4,7 +4,6 @@ import {
   Plus, Pencil, Trash2, Check, X,
 } from 'lucide-react';
 import { useAdmins, deleteAdmin } from './hooks/useAdmins';
-import { useDebounce } from '@/hooks/useDebounce';
 import { usePermissions } from '@/hooks/usePermissions';
 import AdminModal from './AdminModal';
 import type { Admin } from '@/types/admins';

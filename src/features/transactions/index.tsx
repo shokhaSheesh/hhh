@@ -350,7 +350,6 @@ export default function TransactionsPage() {
   const { transactions, total, loading, error } = useTransactions({ page, limit: LIMIT, userId });
   const { completedCount, failedCount } = useTxCounts();
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
     <div className="space-y-5">

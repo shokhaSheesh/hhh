@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, isCollapsed, onClose }: SidebarProps) {
-  const { canRead, isSuperAdmin } = usePermissions();
+  const { canRead } = usePermissions();
   const { theme } = useTheme();
   const logoSrc = theme === 'dark' ? '/LogoSectionDark.png' : '/LogoSection.png';
   const dashboardMenuId   = NAV_GROUPS[0]?.menuId;
